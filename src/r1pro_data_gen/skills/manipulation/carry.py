@@ -237,10 +237,13 @@ class ArmCarryObjectTo:
     tier = "semantic"
     exposed = True
     description = (
-        "Carry an already attached object to a named scene destination. Reads "
-        "the live object-to-grasp transform, builds retract/traverse/extend/"
-        "descend waypoints in object space, converts them to calibrated EE "
-        "poses, and executes one collision-certified arm trajectory."
+        "Carry an already attached object to a named destination region on a "
+        "named support. Use for placement when live on_support matches the "
+        "destination support; if the destination is a different support, "
+        "navigate first. Requires the object to be attached. "
+        "target_region_name is the destination object; support_surface_name is "
+        "the physical support under that destination. Do not use if the object "
+        "is not attached, and do not use this for a no-grasp push goal."
     )
     parameters: dict[str, ParamSpec] = {
         "object_name": ParamSpec("string", "Name of the currently attached object", required=True),
@@ -252,19 +255,19 @@ class ArmCarryObjectTo:
             default="auto",
             enum=("auto", "left", "right"),
         ),
-        "clearance_m": ParamSpec("number", "Object-center clearance above the destination surface (m)", default=0.13, minimum=0.01),
-        "retract_distance_m": ParamSpec("number", "Distance to retract toward the robot before traversing (m)", default=0.12, minimum=0.0),
-        "inward_offset_m": ParamSpec("number", "Destination offset toward the robot within the region (m)", default=0.05, minimum=0.0),
-        "yaw_offsets_rad": ParamSpec("array", "Alternative vertical-tool yaw offsets (rad)", default=list(DEFAULT_CARRY_YAW_OFFSETS), min_items=1, max_items=8),
-        "planning_time": ParamSpec("number", "Planning time per candidate edge (s)", default=0.4, minimum=0.1),
-        "ik_candidates_per_waypoint": ParamSpec("integer", "IK branches retained per waypoint", default=3, minimum=1),
-        "beam_width": ParamSpec("integer", "Verified waypoint prefixes retained", default=3, minimum=1),
-        "max_planned_edges": ParamSpec("integer", "Planning edge budget", default=72, minimum=1),
-        "trajectory_speed_scale": ParamSpec("number", "Carry trajectory speed scale", default=0.36, minimum=0.02),
-        "descend_speed_scale": ParamSpec("number", "Final contact descent speed scale", default=0.18, minimum=0.02),
-        "local_radius_m": ParamSpec("number", "Obstacle culling radius around the live base (m)", default=2.0, minimum=0.5),
-        "place_xy_tolerance_m": ParamSpec("number", "Allowed final object XY error (m)", default=0.015, minimum=1e-4),
-        "place_z_tolerance_m": ParamSpec("number", "Allowed final object Z error (m); held objects sit above rest height until release", default=0.05, minimum=1e-4),
+        "clearance_m": ParamSpec("number", "Object-center clearance above the destination surface (m)", default=0.13, minimum=0.01, exposed=False),
+        "retract_distance_m": ParamSpec("number", "Distance to retract toward the robot before traversing (m)", default=0.12, minimum=0.0, exposed=False),
+        "inward_offset_m": ParamSpec("number", "Destination offset toward the robot within the region (m)", default=0.05, minimum=0.0, exposed=False),
+        "yaw_offsets_rad": ParamSpec("array", "Alternative vertical-tool yaw offsets (rad)", default=list(DEFAULT_CARRY_YAW_OFFSETS), min_items=1, max_items=8, exposed=False),
+        "planning_time": ParamSpec("number", "Planning time per candidate edge (s)", default=0.4, minimum=0.1, exposed=False),
+        "ik_candidates_per_waypoint": ParamSpec("integer", "IK branches retained per waypoint", default=3, minimum=1, exposed=False),
+        "beam_width": ParamSpec("integer", "Verified waypoint prefixes retained", default=3, minimum=1, exposed=False),
+        "max_planned_edges": ParamSpec("integer", "Planning edge budget", default=72, minimum=1, exposed=False),
+        "trajectory_speed_scale": ParamSpec("number", "Carry trajectory speed scale", default=0.36, minimum=0.02, exposed=False),
+        "descend_speed_scale": ParamSpec("number", "Final contact descent speed scale", default=0.18, minimum=0.02, exposed=False),
+        "local_radius_m": ParamSpec("number", "Obstacle culling radius around the live base (m)", default=2.0, minimum=0.5, exposed=False),
+        "place_xy_tolerance_m": ParamSpec("number", "Allowed final object XY error (m)", default=0.015, minimum=1e-4, exposed=False),
+        "place_z_tolerance_m": ParamSpec("number", "Allowed final object Z error (m); held objects sit above rest height until release", default=0.05, minimum=1e-4, exposed=False),
     }
 
     def __init__(

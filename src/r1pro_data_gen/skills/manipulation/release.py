@@ -28,9 +28,11 @@ class ReleaseObject:
     tier = "semantic"
     exposed = True
     description = (
-        "Open the selected gripper to release a named attached object, lift "
-        "the hand clear of the object, and hold still long enough for "
-        "released/settled evidence to exist."
+        "Release a named attached object after it is at the destination. Use "
+        "when GoalSpec still needs released or settled and the object is "
+        "already in the target region or on the target support. Do not release "
+        "to substitute for carrying the object into the region, and do not "
+        "call this if the object is not attached."
     )
     parameters: dict[str, ParamSpec] = {
         "object_name": ParamSpec("string", "Attached object to release", required=True),
@@ -40,7 +42,7 @@ class ReleaseObject:
             default="auto",
             enum=("auto", "left", "right"),
         ),
-        "settle_steps": ParamSpec("integer", "Physics steps to hold after opening", default=12, minimum=1, maximum=240),
+        "settle_steps": ParamSpec("integer", "Physics steps to hold after opening", default=12, minimum=1, maximum=240, exposed=False),
     }
 
     def __init__(

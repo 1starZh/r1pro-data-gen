@@ -135,3 +135,20 @@ def test_build_default_registry_contains_the_generic_skill_library() -> None:
         "whole_body_transfer_object_between_supports",
     ):
         assert reg[name].parameters["side"].enum == ("auto", "left", "right")
+    agent_catalog = {item["name"]: item for item in reg.agent_descriptions()}
+    assert set(agent_catalog["arm_carry_object_to"]["parameters"]) == {
+        "object_name",
+        "target_region_name",
+        "support_surface_name",
+        "side",
+    }
+    assert "retract_distance_m" not in agent_catalog["arm_carry_object_to"]["parameters"]
+    assert "resolution" not in agent_catalog["base_navigate_to"]["parameters"]
+    assert "settle_steps" not in agent_catalog["release_object"]["parameters"]
+    joined = " ".join(str(item["description"]) for item in agent_catalog.values())
+    assert "table-height" in joined
+    assert "Do not navigate if the arm can already reach" in joined
+    assert "Do not use when the goal forbids grasping" in joined
+    assert "retract/traverse" not in joined
+    assert "non-contact standoff" not in joined
+    assert "pick_cylinder" not in joined

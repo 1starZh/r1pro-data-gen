@@ -65,10 +65,8 @@ scene:
       filter: [push_box]
   collision_sensors: []
 instruction: >-
-  The robot is already at the push interaction stance. Complete the whole task
-  without grasping: make physical contact with push_box, push it across the floor
-  until it is fully inside the goal_region of push_goal, then stop and leave it
-  there.
+  Without grasping, make physical contact with push_box and leave it fully
+  inside the goal_region of push_goal.
 tags:
   - manipulation
   - complete_episode

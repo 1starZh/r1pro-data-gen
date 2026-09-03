@@ -274,8 +274,8 @@ def _reject_same_support_navigation(
     target_name = _navigation_target_name(parameters)
     if target_name is not None and target_name in attached:
         raise AgentActionValidationError(
-            "same_support_navigation_forbidden: do not navigate to an attached object; "
-            "use arm_carry_object_to on the current support"
+            "same_support_navigation_forbidden: cannot navigate to an attached "
+            "object; use arm_carry_object_to on the current support"
         )
     current_support = _support_for_attached_object(
         attached,
@@ -293,8 +293,9 @@ def _reject_same_support_navigation(
     )
     if current_support and target_support and current_support == target_support:
         raise AgentActionValidationError(
-            "same_support_navigation_forbidden: the place region is on the current "
-            "support; use arm_carry_object_to instead of base_navigate_to"
+            "same_support_navigation_forbidden: destination is on the support "
+            "that currently holds the attached object; use arm_carry_object_to "
+            "rather than base_navigate_to"
         )
 
 
@@ -450,7 +451,9 @@ def _named_xyz(
 ) -> tuple[float, float, float] | None:
     if isinstance(object_positions, Mapping):
         raw = object_positions.get(name)
-        if raw is not None and len(raw) >= 3:
+        if isinstance(raw, Mapping):
+            raw = raw.get("position")
+        if raw is not None and not isinstance(raw, (str, bytes)) and len(raw) >= 3:
             try:
                 return (float(raw[0]), float(raw[1]), float(raw[2]))
             except (TypeError, ValueError):

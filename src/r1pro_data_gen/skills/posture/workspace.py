@@ -31,10 +31,12 @@ class PrepareWorkspace:
     tier = "semantic"
     exposed = True
     description = (
-        "Move the torso and upper body to a named workspace profile. "
-        "Use tabletop when a table grasp needs a standing height, floor before "
-        "a ground or low-support grasp, carry after attachment, and travel "
-        "before a long navigation. Do not pass joint angles."
+        "Move the torso to a named workspace profile. tabletop for "
+        "table-height work, floor for ground or low supports, carry after an "
+        "object is attached, travel before a long navigation. Call this when "
+        "grasp reports workspace_not_prepared, or before manipulating an "
+        "object whose live height is near the ground. Do not pass joint "
+        "angles, and do not use this instead of navigation or grasping."
     )
     parameters: dict[str, ParamSpec] = {
         "profile": ParamSpec(

@@ -45,9 +45,11 @@ class PushObjectTo:
     tier = "semantic"
     exposed = True
     description = (
-        "Approach a scene-authored pushable object from the safe opposite side "
-        "and push it toward a semantic scene target while observing its live "
-        "pose. Use target_ref=scene://object[/region] or target_pose."
+        "Push a named pushable object toward a semantic target without "
+        "grasping. Use when the goal forbids grasping or asks to push, and "
+        "live capabilities include pushable. Do not combine with grasp or "
+        "carry, and do not use when the goal requires attachment. Give exactly "
+        "one of target_ref, target_region_name, or target_pose."
     )
     parameters: dict[str, ParamSpec] = {
         "object_name": ParamSpec("string", "Pushable scene object", required=True),
@@ -72,23 +74,26 @@ class PushObjectTo:
             "Final planar object position tolerance (m)",
             default=0.05,
             minimum=0.005,
+            exposed=False,
         ),
         "contact_clearance_m": ParamSpec(
             "number",
             "Extra base-to-object contact clearance (m)",
             default=0.03,
             minimum=0.0,
+            exposed=False,
         ),
-        "v_max": ParamSpec("number", "Maximum forward push speed (m/s)", default=0.05, minimum=0.005),
-        "omega_max": ParamSpec("number", "Maximum heading rate (rad/s)", default=0.20, minimum=0.02),
-        "max_steps": ParamSpec("integer", "Physics-step budget for approach and push", default=900, minimum=30),
-        "stall_steps": ParamSpec("integer", "Steps without object progress before failure", default=90, minimum=10),
+        "v_max": ParamSpec("number", "Maximum forward push speed (m/s)", default=0.05, minimum=0.005, exposed=False),
+        "omega_max": ParamSpec("number", "Maximum heading rate (rad/s)", default=0.20, minimum=0.02, exposed=False),
+        "max_steps": ParamSpec("integer", "Physics-step budget for approach and push", default=900, minimum=30, exposed=False),
+        "stall_steps": ParamSpec("integer", "Steps without object progress before failure", default=90, minimum=10, exposed=False),
         "settle_steps": ParamSpec(
             "integer",
             "Physics steps to brake the base and observe the object after reaching the target",
             default=60,
             minimum=1,
             maximum=240,
+            exposed=False,
         ),
     }
 

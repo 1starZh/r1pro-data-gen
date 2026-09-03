@@ -51,9 +51,14 @@ class GraspObject:
     tier = "semantic"
     exposed = True
     description = (
-        "Open the selected gripper, approach a live scene object from a "
-        "non-contact standoff, run measured finger-window alignment, and "
-        "close until both fingers contact and the object is attached."
+        "Attach a named graspable object at the current base stance. Observe "
+        "live size and pose; leave side=auto unless geometry or a failure says "
+        "otherwise. Use when GoalSpec still needs attached and the object is "
+        "not already attached. Low or floor objects need prepare_workspace "
+        "first. If contact fails while reachable_from_here is true, retry this "
+        "skill; if unreachable, navigate instead. Do not use when the goal "
+        "forbids grasping or the object is only pushable. This skill does not "
+        "crouch or navigate."
     )
     parameters: dict[str, ParamSpec] = {
         "object_name": ParamSpec("string", "Scene object to grasp", required=True),
@@ -378,7 +383,7 @@ class GraspObject:
         if low_object and not workspace_prepared:
             return _failure(
                 "workspace_not_prepared",
-                "object is below the current torso workspace; call prepare_workspace before grasp_object",
+                "object is below the current torso workspace; call prepare_workspace then retry grasp_object",
                 attempts=(),
                 skill_name=self.name,
             )

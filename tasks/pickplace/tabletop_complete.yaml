@@ -83,10 +83,8 @@ scene:
 
   collision_sensors: []
 instruction: >-
-  The robot starts about 2 m west of the table. Navigate to a reachable
-  pregrasp stance, grasp pick_cylinder, carry it to the place_region of
-  place_target, place it fully inside that region, release it, and finish with
-  the object settled there.
+  Pick up pick_cylinder and leave it released and settled fully inside the
+  place_region of place_target.
 tags:
   - manipulation
   - complete_episode

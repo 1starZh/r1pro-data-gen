@@ -797,10 +797,16 @@ class BaseNavigateTo:
 
     name = "base_navigate_to"
     description = (
-        "Navigate the base to a collision-free world pose. Prefer a semantic "
-        "target_ref (scene://object) with a purpose such as pregrasp; the "
-        "runtime derives a safe approach pose from scene geometry. A literal "
-        "target pose remains supported as a legacy preferred/executable pose."
+        "Navigate the base to a collision-free interaction stance when the "
+        "target is out of reach. Use target_ref=scene://object with a purpose, "
+        "or a literal target pose copied from the frozen GoalSpec. "
+        "purpose=pregrasp when approaching to grasp; purpose=dropoff when an "
+        "attached object must go to a different support. Call this when "
+        "live.objects.*.reachable_from_here is false or planar_distance_m is "
+        "large. Do not navigate if the arm can already reach, and do not "
+        "navigate to the current support after attachment (use "
+        "arm_carry_object_to). The runtime derives a safe approach from scene "
+        "geometry."
     )
     parameters: dict[str, ParamSpec] = {
         # Semantic navigation resolves the concrete target at execution time.
@@ -810,16 +816,16 @@ class BaseNavigateTo:
         "purpose": ParamSpec("string", "Why the robot is approaching the target", default="navigation", enum=("navigation", "pregrasp", "dropoff", "staging", "observe", "park")),
         "preferred_pose": ParamSpec("array", "Optional preferred pose; resolver may choose a safer candidate", default=None, shape=(3,)),
         "approach_side": ParamSpec("string", "Optional semantic approach side", default=None, enum=("west", "east", "south", "north")),
-        "resolution": ParamSpec("number", "Grid cell size (m)", default=0.05),
-        "footprint_radius": ParamSpec("number", "Optional override; otherwise derived from the R1Pro chassis footprint", default=None, minimum=0.05),
-        "v_max": ParamSpec("number", "Max linear speed (m/s)", default=DEFAULT_V_MAX),
-        "omega_max": ParamSpec("number", "Max yaw rate (rad/s)", default=DEFAULT_OMEGA_MAX),
-        "arrive_tol": ParamSpec("number", "Arrival tolerance (m / rad)", default=DEFAULT_ARRIVE_TOL),
-        "final_arrive_tol": ParamSpec("number", "Final pose arrival tolerance (m / rad); tighter than arrive_tol so an operation stance settles accurately", default=DEFAULT_FINAL_ARRIVE_TOL),
-        "max_steps_per_waypoint": ParamSpec("integer", "Maximum physics steps per A* waypoint", default=600, minimum=30),
-        "motion_mode": ParamSpec("string", "Path tracking style: forward faces the route; holonomic allows lateral motion", default="forward", enum=("forward", "holonomic")),
-        "clearance_margin": ParamSpec("number", "Soft preferred clearance beyond hard footprint inflation (m)", default=0.25, minimum=0.0),
-        "clearance_weight": ParamSpec("number", "Strength of the soft wall-clearance cost", default=3.0, minimum=0.0),
+        "resolution": ParamSpec("number", "Grid cell size (m)", default=0.05, exposed=False),
+        "footprint_radius": ParamSpec("number", "Optional override; otherwise derived from the R1Pro chassis footprint", default=None, minimum=0.05, exposed=False),
+        "v_max": ParamSpec("number", "Max linear speed (m/s)", default=DEFAULT_V_MAX, exposed=False),
+        "omega_max": ParamSpec("number", "Max yaw rate (rad/s)", default=DEFAULT_OMEGA_MAX, exposed=False),
+        "arrive_tol": ParamSpec("number", "Arrival tolerance (m / rad)", default=DEFAULT_ARRIVE_TOL, exposed=False),
+        "final_arrive_tol": ParamSpec("number", "Final pose arrival tolerance (m / rad); tighter than arrive_tol so an operation stance settles accurately", default=DEFAULT_FINAL_ARRIVE_TOL, exposed=False),
+        "max_steps_per_waypoint": ParamSpec("integer", "Maximum physics steps per A* waypoint", default=600, minimum=30, exposed=False),
+        "motion_mode": ParamSpec("string", "Path tracking style: forward faces the route; holonomic allows lateral motion", default="forward", enum=("forward", "holonomic"), exposed=False),
+        "clearance_margin": ParamSpec("number", "Soft preferred clearance beyond hard footprint inflation (m)", default=0.25, minimum=0.0, exposed=False),
+        "clearance_weight": ParamSpec("number", "Strength of the soft wall-clearance cost", default=3.0, minimum=0.0, exposed=False),
     }
 
     def __init__(

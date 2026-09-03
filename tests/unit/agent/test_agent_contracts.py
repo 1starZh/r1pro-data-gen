@@ -222,7 +222,10 @@ def test_attached_same_support_navigation_is_rejected() -> None:
             scene_object_names=("pick_cylinder", "work_table", "other_table"),
             scene=scene,
             attachments={"pick_cylinder": "left_gripper"},
-            object_positions={"pick_cylinder": [1.0, 0.0, 0.95], "work_table": [1.0, 0.0, 0.375]},
+            object_positions={
+                "pick_cylinder": {"position": [1.0, 0.0, 0.95]},
+                "work_table": {"position": [1.0, 0.0, 0.375]},
+            },
         )
 
 

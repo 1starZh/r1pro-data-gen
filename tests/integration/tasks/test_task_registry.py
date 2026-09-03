@@ -36,7 +36,9 @@ def test_task_id_resolves_scene_and_instruction() -> None:
     assert spec.scene["name"] == "tabletop_cylinder_manipulation"
     assert spec.scene_human_verified is True
     assert load_scene_data(spec.scene).name == "tabletop_cylinder_manipulation"
-    assert "grasp" in spec.instruction
+    assert "Pick up pick_cylinder" in spec.instruction
+    assert "released and settled" in spec.instruction
+    assert "place_region" in spec.instruction
     assert spec.source_path is not None
 
 

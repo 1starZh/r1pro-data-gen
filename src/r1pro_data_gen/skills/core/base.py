@@ -32,6 +32,9 @@ class ParamSpec:
     min_items: int | None = None
     max_items: int | None = None
     shape: tuple[int, ...] | None = None
+    # False hides this parameter from LLM/agent catalogues. Execution still
+    # accepts it from trusted replay; the model must not see tuning knobs.
+    exposed: bool = True
 
 
 @dataclass(frozen=True, slots=True)

@@ -89,10 +89,11 @@ def test_repair_prompt_spells_out_base_reachability_action():
         "change the base approach",
     )
     assert "change the existing base_navigate_to approach_side" in prompt
-    assert "Changing only side, wrist orientation" in prompt
+    assert "Changing only arm side or IK budget" in prompt
     payload = json.loads(prompt)
     assert payload["runtime_repair_contract"]["kind"] == "base_approach_change"
-    assert "standoff offset" in payload["runtime_repair_contract"]["forbidden_as_sole_change"]
+    assert "arm side" in payload["runtime_repair_contract"]["forbidden_as_sole_change"]
+    assert "standoff offset" not in payload["runtime_repair_contract"]["forbidden_as_sole_change"]
 
 
 def test_repair_prompt_copies_fact_supported_navigation_candidates():
@@ -298,8 +299,9 @@ def test_system_prompt_uses_factual_feedback_without_task_recipe():
     assert "coordinate frames explicit" in prompt
     assert "fact_feedback.v1" in prompt
     assert "request, observations, discrepancies, and completed_prefix" in prompt
-    assert "informational evidence" in prompt
-    assert "must not be treated as an action prescription" in prompt
+    assert "family recovery principles" in prompt
+    assert "do not copy a scene-specific repair" in prompt
+    assert "do not follow a scene-specific recipe" in prompt
     assert "failure_feedback.v2" not in prompt
     assert "root_cause_hypotheses" not in prompt
     assert "required_repairs" not in prompt
@@ -313,24 +315,16 @@ def test_system_prompt_uses_factual_feedback_without_task_recipe():
     assert "approach_candidates" not in prompt
     assert "[1.35" not in prompt
     assert "constraints.previous_plan" in prompt
-    assert "preserve safety-critical semantics" in prompt
-    assert "standoff approach itself is not a local contact correction" in prompt
-    assert "contact_not_centered" in prompt
-    assert "do not blindly reuse a standoff" in prompt
-    assert "vertical_error_m" in prompt
-    assert "materially closer non-contact approach" in prompt
-    assert "independently observable approach change" in prompt
-    assert "changing only search budget" in prompt
-    assert "no_collision_free_path" in prompt
-    assert "do not lower its standoff" in prompt
+    assert "arm_align_gripper" not in prompt
+    assert "gripper_set" not in prompt
+    assert "require_between_fingers" not in prompt
+    assert "ordinary tabletop pick-and-place" not in prompt
+    assert "must not be the source support" not in prompt
+    assert "carry on the current support" in prompt
+    assert "observe object size and pose" in prompt
+    assert "support_surface_name identifies the physical object supporting that destination" in prompt
     assert "position_reachable_without_orientation=false" in prompt
     assert "changing only arm side" in prompt
-    assert "target_frame=grasp_center explicitly" in prompt
-    assert "different collision-free reachable approach pose or arm side" in prompt
-    assert "no IK candidate at the final descent" in prompt
-    assert "Never release above the support" in prompt
-    assert "support_surface_name identifies the physical object supporting that destination" in prompt
-    assert "must not be the source support" in prompt
 
 
 def test_user_prompt_preserves_previous_plan_context():

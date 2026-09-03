@@ -150,9 +150,8 @@ scene:
       body: right_gripper_finger_link2
       filter: [pick_cylinder]
 instruction: >-
-  Navigate to the table if needed, grasp pick_cylinder, carry it into the
-  place_region of place_target, release it, and finish with the object settled
-  there.
+  Pick up pick_cylinder and leave it released and settled fully inside the
+  place_region of place_target.
 tags:
   - manipulation
   - primary

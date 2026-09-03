@@ -1,10 +1,9 @@
-"""Task-independent high-level plan skeletons for the closed-loop agent.
+"""Debug-only semantic skeletons derived from a frozen GoalSpec.
 
-The skeleton is deliberately not an executable plan.  It groups frozen goal
-predicates into semantic intents and lists compatible public skills.  The
-agent still chooses one skill from the live observation at every step, so the
-same representation covers navigation, grasp/carry, rearrangement, pushing,
-and future articulated-object capabilities.
+This mapping is an operator artifact (``plan_skeleton.json``). It must not be
+sent to the agent or task-planning LLM: listing candidate skills in GoalSpec
+order is a method leak. The live agent chooses from observation + GoalSpec +
+the public catalogue only.
 """
 
 from __future__ import annotations

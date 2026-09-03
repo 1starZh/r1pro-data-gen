@@ -16,7 +16,7 @@ from r1pro_data_gen.agent.contracts import (
     parse_agent_response,
     validate_action_envelope,
 )
-from r1pro_data_gen.agent.skeleton import build_semantic_plan_skeleton
+
 from r1pro_data_gen.planning.llm.providers.protocol import ProviderError, TaskPlanningProvider
 from r1pro_data_gen.skills import SkillResult
 
@@ -200,10 +200,6 @@ class AgentLoop:
         # sink must never change the task result or interrupt a physical
         # episode.
         self.checkpoint_fn = checkpoint_fn
-        self.plan_skeleton = build_semantic_plan_skeleton(
-            self.goal_spec,
-            skill_catalogue=self.catalog,
-        )
 
     def run(self, *, task_description: str) -> AgentEpisode:
         if not task_description.strip():
@@ -261,7 +257,6 @@ class AgentLoop:
                             if self.feedback_window
                             else ()
                         ),
-                        plan_skeleton=self.plan_skeleton,
                     )
                     user = user_prompt(
                         task_description=task_description,

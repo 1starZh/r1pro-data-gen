@@ -123,6 +123,7 @@ def run_hosted_agent(
     registry = build_default_registry(kin, np.asarray(R1PRO_ARM_VELOCITY_LIMITS))
     lifecycle("skill_registry_ready", skill_count=len(registry.agent_descriptions()))
     facts = scene_to_facts(scene, kinematics=kin)
+    # Operator debug only. Never send this mapping to the agent prompt.
     plan_skeleton = build_semantic_plan_skeleton(
         goal_spec,
         skill_catalogue=registry.agent_descriptions(),

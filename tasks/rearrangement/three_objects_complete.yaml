@@ -139,14 +139,11 @@ scene:
 
   collision_sensors: []
 instruction: >-
-  The robot is already at a safe interaction stance. Complete the whole
-  rearrangement task: move rearrange_red into the goal_region of
-  rearrange_red_goal, rearrange_blue into the goal_region of
-  rearrange_blue_goal, and rearrange_green into the goal_region of
-  rearrange_green_goal. Grasp, carry, place, and release every object; finish
-  only when all three objects are released and settled in their own distinct
-  target regions. The goals are independent, with no stacking requirement and
-  no required execution order. Do not spend actions on navigation.
+  Pick up rearrange_red, rearrange_blue, and rearrange_green, and leave each
+  released and settled fully inside its own distinct target region:
+  rearrange_red_goal/goal_region, rearrange_blue_goal/goal_region, and
+  rearrange_green_goal/goal_region. The goals are independent, with no stacking
+  requirement and no required execution order.
 tags:
   - manipulation
   - complete_episode

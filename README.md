@@ -65,7 +65,7 @@ python scripts/tasks/run_task.py \
   --output-dir outputs/tasks/<this_run>
 ```
 
-产物在 `outputs/tasks/<run>/`：`result.json`、`action_trace.json`、`rollout.mp4`。该目录不入库。
+产物在 `outputs/tasks/<run>/`：`result.json`、`action_trace.json`、`rollout.mp4`。
 
 ## 测试
 

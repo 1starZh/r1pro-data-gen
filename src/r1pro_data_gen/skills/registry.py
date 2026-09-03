@@ -42,13 +42,19 @@ class SkillRegistry:
     def names(self) -> tuple[str, ...]:
         return tuple(sorted(self._skills))
 
-    def descriptions(self, *, public_only: bool = False) -> list[dict[str, object]]:
+    def descriptions(
+        self,
+        *,
+        public_only: bool = False,
+        for_llm: bool = False,
+    ) -> list[dict[str, object]]:
         """Catalogue for the planner: name, description, parameter schema.
 
         Low-level actuator skills remain registered for replay and diagnostics,
         but a future LLM should normally receive ``llm_descriptions()`` so it
         chooses semantic actions such as ``arm_move_to`` instead of assembling
-        an unsafe raw position command by itself.
+        an unsafe raw position command by itself. ``for_llm=True`` omits
+        parameters marked ``exposed=False`` so tuning knobs stay off the model.
         """
         return [
             {
@@ -58,6 +64,7 @@ class SkillRegistry:
                 "parameters": {
                     pname: _llm_parameter_description(spec)
                     for pname, spec in skill.parameters.items()
+                    if not for_llm or getattr(spec, "exposed", True)
                 },
             }
             for skill in self._skills.values()
@@ -70,7 +77,7 @@ class SkillRegistry:
 
         return [
             item
-            for item in self.descriptions(public_only=False)
+            for item in self.descriptions(public_only=False, for_llm=True)
             if item["name"] in LLM_PUBLIC_SKILLS
         ]
 
@@ -80,7 +87,7 @@ class SkillRegistry:
 
         return [
             item
-            for item in self.descriptions(public_only=False)
+            for item in self.descriptions(public_only=False, for_llm=True)
             if item["name"] in AGENT_PUBLIC_SKILLS
         ]
 

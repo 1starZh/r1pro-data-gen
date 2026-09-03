@@ -115,6 +115,13 @@ def test_agent_loop_stops_when_progress_reports_success() -> None:
     assert orchestrator.calls[0][0] == "grasp_object"
     plan = episode.to_plan_dict()
     assert plan["stages"][0]["parameters"]["skill"] == "grasp_object"
+    system, user = provider.seen[0]
+    assert "plan_skeleton" not in user
+    assert "candidate_skills" not in user
+    assert "skill_catalogue" not in user
+    assert "Do not follow a scene-specific recipe" in system
+    assert "ordinary tabletop pick-and-place" not in system
+    assert "observe object size and pose" in system
 
 
 def test_agent_loop_rejects_micro_skill_without_executing() -> None:

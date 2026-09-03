@@ -206,19 +206,13 @@ def _system_prompt(skill_catalog: Sequence[Mapping[str, Any]]) -> str:
         "parameters. "
         "For arm_carry_object_to, target_region_name identifies the destination "
         "marker/object and support_surface_name identifies the physical object "
-        "supporting that destination; it must not be the source support from "
-        "which the object was picked, because the carry skill infers source "
-        "support internally and uses this parameter to compute destination "
-        "height. "
-        "For pick-and-place, emit separate public skills in order: "
-        "base_navigate_to(purpose=pregrasp), optionally prepare_workspace when "
-        "the grasp height is wrong or the object is on the floor, grasp_object, "
-        "arm_carry_object_to, release_object. There is one public grasp name. "
-        "Do not emit transfer_object_between_supports, "
+        "supporting that destination. "
+        "There is one public grasp name. Do not emit "
+        "transfer_object_between_supports, "
         "whole_body_transfer_object_between_supports, support_aware_grasp_object, "
-        "torso_move_to, or query skills; those are internal. After attachment, "
-        "do not navigate to the current support; use arm_carry_object_to. "
-        "purpose=dropoff is only for a different support. "
+        "torso_move_to, or query skills; those are internal. Apply the "
+        "task-family strategy below to the live observation and frozen GoalSpec; "
+        "do not follow a scene-specific recipe. "
         "Keep coordinate frames explicit: never copy a "
         "world-frame coordinate directly into a base-frame parameter; declare "
         "the reference with its frame and let the runtime resolver convert. "
@@ -231,7 +225,7 @@ def _system_prompt(skill_catalog: Sequence[Mapping[str, Any]]) -> str:
         "the public skill contracts. Choose safe, collision-aware, reachable "
         "poses from declared geometry and keep coordinate frames explicit. Use "
         "only values supported by the task, scene facts, observations, and "
-        "skill catalogue; do not invent task-specific recipes, calibration "
+        "skill catalogue; do not invent scene-specific recipes, calibration "
         "constants, or tuning numbers. Prefer a semantic public skill over "
         "manual backend details and let references read live state rather than "
         "stale copied coordinates. For base navigation to a scene entity, use "
@@ -241,57 +235,29 @@ def _system_prompt(skill_catalog: Sequence[Mapping[str, Any]]) -> str:
         "A literal target pose may be supplied only as a preferred pose or when "
         "the instruction explicitly requires an exact world pose; do not treat "
         "a guessed coordinate as the task goal. "
-        # --- Section 4: physical interaction doctrine ------------------------
-        "Plan physical interaction in phases that keep the robot safe and the "
-        "target reachable: approach an object on a support surface from a "
-        "non-contact standoff clearly above it before descending (a small "
-        "offset lets the gripper collide with the object or its support, and a "
-        "single long move straight to the object can cross the support edge "
-        "and fail planning), prefer measured alignment (arm_align_gripper) "
-        "when the object's exact grasp point matters, then establish contact, "
-        "verify the grasp holds, and only then carry the object clear of its "
-        "surfaces. When a measured alignment precedes a grasp, always set "
-        "require_between_fingers=true and require_vertical_alignment=true so "
-        "the object is brought into the jaw window and down to grasp height in "
-        "one measured loop; alignment success without the object between the "
-        "fingers cannot support a pinch. Never command a grasped object "
-        "through its support surface "
-        "or hold it at an unreachable height while moving. A measured "
-        "alignment or short local descent onto a support surface should "
-        "exclude that support surface (and the target object itself) from its "
-        "obstacle set -- these are controlled local corrections, not "
-        "traversals, and keeping the support as an obstacle makes the "
-        "short descent's IK fail right above the surface. The pre-grasp "
-        "standoff approach itself is not a local contact correction: keep the "
-        "support surface and other physical obstacles in its obstacle set, "
-        "and reserve those exclusions for the subsequent measured alignment "
-        "or contact descent stage. "
-        "Before arm_align_gripper is used with require_between_fingers=true, "
-        "explicitly open the same gripper side with gripper_set (open_value "
-        "> 0) earlier in the plan; do not rely on reset state or an implicit "
-        "opening. This is a generic gripper-state precondition, and the local "
-        "validator rejects a measured pinch alignment that has no preceding "
-        "open command. "
-        "standoff must be high enough that the grasp-pose target is "
-        "collision-free, but not so high that the measured alignment cannot "
-        "descend to the object within its iteration budget; a standoff of a "
-        "few tens of centimetres is the usual range, and request enough "
-        "alignment iterations when the standoff is large. When a standoff "
-        "precedes arm_align_gripper and its target is expressed relative to "
-        "the observed object, write target_frame=grasp_center explicitly; "
-        "never rely on arm_move_to's default ee frame for a measured grasp "
-        "alignment, because the model EE origin and the live finger midpoint "
-        "are not interchangeable. "
+        # --- Section 4: task-family strategy --------------------------------
+        "Apply this family strategy to unknown scenes. It is not a named-task "
+        "script: do not emit a fixed stage list for a particular table, object, "
+        "or arm. If the arm cannot reach the target, navigate first "
+        "(purpose=pregrasp to grasp, purpose=dropoff when an attached object "
+        "must go to a different support). Match upper-body height to the "
+        "support (tabletop vs floor; carry after attachment; travel before a "
+        "long navigation). For grasping, observe object size and pose and keep "
+        "side=auto unless live geometry justifies an explicit arm. After "
+        "attachment, carry on the current support; navigate with purpose=dropoff "
+        "only for a different support. If the goal forbids grasping or asks to "
+        "push, use push_object_to. Public skills own their internal approach, "
+        "alignment, contact, and placement motions. Do not emit skills outside "
+        "the catalogue, guessed centimetre offsets, or a composed low-level "
+        "grasp/place sequence. "
         # --- Section 5: interpreting execution feedback ----------------------
         "If constraints.failure_feedback or constraints.active_runtime_feedback "
         "is present, parse each item as the structured fact_feedback.v1 contract. "
         "The contract contains request, observations, discrepancies, and "
         "completed_prefix, plus the immutable GoalSpec hash and evidence refs. "
-        "Treat these fields as informational evidence only: they describe what "
-        "was requested and observed, and must not be treated as an action "
-        "prescription. Do not infer unverified causes as facts, do not emit a "
-        "repair recipe, and do not select a next skill because feedback names "
-        "one. Re-plan from the unchanged GoalSpec, scene facts, task text, and "
+        "Treat these fields as evidence and apply the family recovery principles "
+        "below; do not copy a scene-specific repair or invent unverified causes. "
+        "Re-plan from the unchanged GoalSpec, scene facts, task text, and "
         "public skill catalogue. A paired discrepancy compares an observed "
         "error against the skill's declared tolerance; an observation with "
         "position_reachable_without_orientation=true means the base pose is "
@@ -300,67 +266,22 @@ def _system_prompt(skill_catalog: Sequence[Mapping[str, Any]]) -> str:
         "the base is too far away and must move "
         "closer or select another reachable approach before the arm can work; "
         "changing only arm side, wrist orientation, or IK budget is not a base "
-        "repair. "
-        "A previous stage is not valid merely because its skill returned "
-        "success: if a later measured arm_align_gripper result reports "
-        "contact_not_centered, object_window_not_reached, or a vertical "
-        "alignment error outside tolerance, treat the preceding non-contact "
-        "standoff as unresolved and re-observe/re-resolve it. Preserve the "
-        "goal and collision semantics, but do not blindly reuse a standoff "
-        "target_frame or stale offset that the measured alignment disproves; "
-        "a grasp-center standoff is the generic position-first choice when a "
-        "measured gripper alignment follows, and make that frame explicit in "
-        "the stage parameters. "
-        "When vertical_error_m is still materially above its declared "
-        "vertical_tolerance_m, a small cosmetic offset change is not evidence "
-        "of repair: use the observed direction and magnitude to choose a "
-        "materially closer non-contact approach or another bounded local "
-        "motion that remains collision-safe, then let the alignment gate "
-        "re-measure it. Do not treat a one-sided contact force as a successful "
-        "grasp and do not claim convergence until between_fingers and all "
-        "requested alignment gates are observed. If one-sided contact repeats "
-        "after a materially different standoff, do not keep perturbing the "
-        "same vertical target: re-observe the live geometry and choose a "
-        "different collision-free reachable approach pose or arm side only "
-        "when the scene facts support it; retain fail-closed contact gates. "
-        "When the first contact_not_centered failure leaves vertical error "
-        "materially above tolerance, the next plan must make at least one "
-        "independently observable approach change (a different reachable "
-        "approach pose or direction, arm side, or freshly measured "
-        "non-contact grasp-center target); changing only search budget or a "
-        "cosmetic vertical offset is not a new approach. Preserve the same "
-        "safety and alignment predicates while testing that change. "
-        "If a non-contact arm_move_to approach with target_frame=grasp_center "
-        "reports planning_status=no_collision_free_path, treat that target as "
-        "unverified: do not lower its standoff, remove support/obstacle "
-        "exclusions, or claim that a larger planning budget repaired it. "
-        "Preserve the grasp-center frame and choose a materially higher "
-        "collision-free standoff or another fact-supported reachable approach "
-        "pose/arm/base direction, then let the runtime planner re-certify the "
-        "path. "
-        "If a carry or waypoint stage reports no IK candidate at the final "
-        "descent, do not assume that more search budget alone repairs it: use "
-        "the reported target diagnostics to choose another reachable point "
-        "inside the declared destination region, a supported orientation, or "
-        "a different arm/approach, then let the collision and GoalSpec gates "
-        "re-check the placement. Never release above the support or weaken the "
-        "final placement predicates merely to make IK succeed. "
-        # --- Section 5: bounded re-planning discipline -------------------------
+        "repair. If a grasp failed to attach and the object is still in reach, "
+        "retry grasp_object rather than inserting extra navigation. If the "
+        "destination is on the same support as an attached object, carry with "
+        "the arm rather than driving. "
+        "A previous stage is not task success merely because its skill returned "
+        "success. Preserve the goal and collision semantics. "
+        # --- Section 6: bounded re-planning discipline -------------------------
         "When re-planning after a failure, preserve completed semantic work when "
         "it remains valid, re-observe live state before using new coordinates, "
         "and change only what is justified by the unchanged goal and available "
         "facts. If constraints.previous_plan is present, it is the exact last "
         "validated Plan; copy its valid stages and parameters first, then make "
         "the smallest evidence-backed edit. Do not delete a previously valid "
-        "approach, observation, or standoff stage merely to shorten the plan. "
-        "If the reported failure is trajectory tracking or execution after a "
-        "safe target was planned, preserve safety-critical semantics such as "
-        "target_frame, collision exclusions, measured-alignment gates, and a "
-        "non-contact standoff; adjust only evidence-supported planning budget, "
-        "IK branch count, speed, or a fresh observation. Do not lower a "
-        "standoff or switch target frames just to hide a tracking failure. "
+        "public-skill stage merely to shorten the plan. "
         "Never weaken safety, validation, or final completion criteria. "
-        # --- Section 6: boundaries ---------------------------------------------
+        # --- Section 7: boundaries ---------------------------------------------
         "Do not use run_registered_task, task_id, variant, task policy names, "
         "or any task-specific executor. You produce semantic Plan stages only "
         "- never Python, adapter calls, joint trajectories, velocity commands, "
@@ -391,7 +312,6 @@ def _user_prompt(request: TaskPlanningRequest) -> str:
             "Use [] for depends_on on the first stage.",
             "Do not invent fields such as args, dependencies, or stage.skill.",
             "If constraints.previous_plan is present, preserve its valid stages and parameters and edit only what the feedback justifies.",
-            "Before arm_align_gripper with require_between_fingers=true, include a preceding gripper_set with open_value > 0 for the same side.",
         ],
     }
     if request.goal_spec is not None:
@@ -800,22 +720,19 @@ def _repair_prompt(
         runtime_repair_guidance = (
             " This is a base-position reachability repair: change the existing "
             "base_navigate_to approach_side, target/target_ref/preferred_pose, or purpose, or "
-            "add a fact-supported base_move_to/base_rotate_to stage before the "
-            "arm stage. Changing only side, wrist orientation, standoff, or IK "
-            "budget is not a base approach change."
+            "add a fact-supported base navigation stage before the "
+            "arm stage. Changing only arm side or IK budget is not a base "
+            "approach change."
         )
     elif "contact_not_centered" in error or "independently observable approach" in error:
         runtime_repair_guidance = (
-            " This is a measured approach repair: change a reachable approach "
-            "pose/direction, arm side, or freshly measured non-contact target; "
-            "do not only change search budget or make a cosmetic z edit."
+            " This is an approach repair: change a reachable approach "
+            "pose, direction, or arm side; do not only change search budget."
         )
     elif "no_collision_free_path" in error:
         runtime_repair_guidance = (
-            " This is a non-contact clearance repair: preserve the grasp_center "
-            "frame and increase clearance or choose another fact-supported "
-            "reachable approach; do not lower the standoff or only increase "
-            "search budget."
+            " This is a clearance repair: choose another fact-supported "
+            "reachable approach; do not only increase search budget."
         )
     payload = {
         "task_description": request.task_description,
@@ -844,12 +761,9 @@ def _repair_prompt(
             "and do not add unrelated actions, recipes, calibration constants, "
             "or numeric tuning. If constraints.previous_plan is present, copy "
             "its valid stages and parameters and repair only the field named by "
-            "the validation error; do not drop previously valid approach or "
-            "observation stages. Return status unsupported if the task cannot be "
-            "represented safely. If the validation error concerns "
-            "arm_align_gripper with require_between_fingers=true, add a prior "
-            "gripper_set with open_value > 0 for that same side and preserve "
-            "the measured-alignment safety gates. Validation error: "
+            "the validation error; do not drop previously valid public-skill "
+            "stages. Return status unsupported if the task cannot be "
+            "represented safely. Validation error: "
             f"{error[:1000]}"
             f"{runtime_repair_guidance}"
         ),
@@ -914,7 +828,6 @@ def _runtime_repair_contract(
             "forbidden_as_sole_change": [
                 "arm side",
                 "wrist orientation",
-                "standoff offset",
                 "IK/search budget",
             ],
             "candidate_source": "scene_facts.navigation.approach_candidates",
@@ -934,9 +847,9 @@ def _runtime_repair_contract(
         return {
             "kind": "non_contact_clearance_change",
             "required_change": [
-                "preserve grasp_center and increase non-contact clearance, or choose another fact-supported reachable approach",
+                "choose another fact-supported reachable approach",
             ],
-            "forbidden_as_sole_change": ["lowering standoff", "search budget"],
+            "forbidden_as_sole_change": ["search budget"],
             "candidate_source": "scene_facts and declared observation outputs",
         }
     return None

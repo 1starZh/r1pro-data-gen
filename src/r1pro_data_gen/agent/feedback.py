@@ -1,9 +1,9 @@
-"""Bounded factual feedback for plan-only replanning.
+"""Bounded feedback for plan-only replanning.
 
-The feedback boundary deliberately records what was requested and what was
-observed.  It does not infer a cause, select a next skill, or emit repair
-parameters.  Any decision about a new plan remains with the planner and the
-validated public skill catalogue.
+The payload records what was requested and what was observed.  Task-family
+recovery (change base when unreachable, retry grasp while still in reach,
+carry on the same support) lives in the planner/agent prompts, not as a
+scene-specific stage list inside this record.
 """
 
 from __future__ import annotations

@@ -97,11 +97,8 @@ scene:
 
   collision_sensors: []
 instruction: >-
-  The robot is already at a safe interaction stance beside the ground object.
-  Complete the whole task: grasp pick_cylinder on the floor, lift and carry it
-  to the work_table, place it fully inside the place_region of place_target on
-  that table, release it, and finish with it settled on the table. Do not spend
-  actions on navigation.
+  Pick up pick_cylinder from the floor and leave it released and settled fully
+  inside the place_region of place_target on the work_table.
 tags:
   - manipulation
   - complete_episode

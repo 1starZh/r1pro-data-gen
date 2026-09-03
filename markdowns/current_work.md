@@ -6,16 +6,16 @@
 
 产品路径已经是：`TaskSpec` → 冻结 GoalSpec → 同进程 `AgentLoop`（一步一个公开技能）→ Evidence / Verifier。规划期仿真时钟冻结。公开技能六个，见 [`skill.md`](skill.md)。
 
-物理上能跑、且已人工确认场景的任务有两个：
+此前 GPU 上跑通的桌面/两门 episode **不能**当作「LLM 自己根据技能+观测规划」的证据：当时 `system_prompt` 把桌面抓放四段顺序写死了，观测里还带 `plan_skeleton`（按 GoalSpec 顺序推荐候选技能），skill 描述和任务 YAML instruction 也在提示方法。那些跑通只说明技能执行层能走完，不说明 Agent 会规划。
 
-| 任务 | 最近一次 | 结果 |
+清掉这些泄露之后，必须重跑才算数。旧产物：
+
+| 任务 | 最近一次 | 仅作技能执行参考，不作规划证据 |
 | --- | --- | --- |
-| `pickplace.tabletop_complete`（只有桌子） | `outputs/tasks/pickplace_tabletop_complete_loop11/` | 导航 → 抓 → 搬 → 放，四段技能全成功，`stage_success_complete: true`，录像约 20 s |
-| `pickplace.tabletop`（两门房间） | `outputs/tasks/pickplace_tabletop_doors_after_skillfix/` | 过门导航成功，左臂一次抓住；搬运失败 2 次后再成功；松手成功。Goal 接受，但 `stage_success_complete: false`，录像约 45 s |
+| `pickplace.tabletop_complete`（只有桌子） | `outputs/tasks/pickplace_tabletop_complete_loop11/` | 四段技能全成功，录像约 20 s |
+| `pickplace.tabletop`（两门房间） | `outputs/tasks/pickplace_tabletop_doors_after_skillfix/` | 过门、抓住、搬运重试后放下；`stage_success_complete: false`，录像约 45 s |
 
-抓取在这两个场景都能一次抓住。放下在只有桌子时靠「物体已在区域内」判定过关（末端跟踪仍差约 5.9 cm）；两门前两次竖直下降规划失败（`place_descend_failed` / 无碰路径），第三次才落到区域。局内失败反馈 2 次，都花在重试搬运。
-
-CPU/合同测试当前可收集约 566 条。地面到桌面、推移、多物体、随机 8/10 套件**还没有**用现在这套技能跑出正式泛化率。
+CPU/合同测试可收集约 566 条。地面到桌面、推移、多物体、随机 8/10 **还没有**在无配方提示下跑过。
 
 ## 问题
 
@@ -34,7 +34,7 @@ CPU/合同测试当前可收集约 566 条。地面到桌面、推移、多物�
 
 同一套技能在「面前一张桌子」和「两道门再加一张桌子」上表现已经分叉：导航过门可以，放下在障碍/角落工作空间里反复规划失败。  
 地面、低支撑、推移、多物体、随机位姿都还没形成可报的 8/10。  
-当前“完成”很大一块是固定场景 + 冻结 GoalSpec + 局内重试 + 放宽放置判定，不能当成结构泛化已经过关。
+当前“完成”很大一块是固定场景 + 冻结 GoalSpec + 局内重试 + 放宽放置判定，再加上已经清掉的任务配方提示，不能当成结构泛化已经过关。
 
 ## 下一步
 
