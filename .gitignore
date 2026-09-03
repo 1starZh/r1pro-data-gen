@@ -1,0 +1,65 @@
+# Secrets and machine-local notes
+llm_api.txt
+README_local.md
+.env
+.env.*
+!.env.example
+
+# Run artifacts (videos, evidence, frozen specs from rollouts)
+outputs/
+*.mp4
+*.mkv
+*.avi
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env/
+
+# Tests / type checkers
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Local agent / IDE tooling (not part of the product)
+.claude/
+.serena/
+.zcf/
+.agents/
+.codex/
+.superpowers/
+.grok/
+.cursor/
+
+# Historical intermediate docs (not the living markdowns/)
+docs/
+
+# Large robot USDA (get from Galaxea / 星海图 official R1 Pro repo)
+asset/r1pro/r1pro.usda
+asset/r1pro/r1pro_backup.usda
+
+# Isaac Sim / Kit / Omniverse local caches and logs
+*.log
+kit_*.log
+.nvidia-omniverse/
+core.*

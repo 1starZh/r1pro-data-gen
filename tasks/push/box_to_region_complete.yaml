@@ -1,0 +1,75 @@
+schema_version: task_spec.v2
+id: push.box_to_region_complete
+family: push
+scene_human_verified: false
+scene:
+  # Generic planar-push holdout scene.
+  # The task is expressed by the instruction/GoalSpec; this file only declares
+  # robot, geometry, physical capabilities, and a semantic target region.
+  name: push_showcase
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [8.0, 6.0]
+    ground_color: [0.22, 0.24, 0.27]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    init_pose: [-1.00, 0.00, 0.00]
+    home_joint_pos: {}
+    navigation_footprint_radius_m: 0.25
+
+  objects:
+    - name: push_box
+      type: cuboid
+      size: [0.16, 0.16, 0.12]
+      pos: [0.00, 0.00, 0.06]
+      rigid_object: true
+      capabilities: [movable, pushable]
+      mass: 0.20
+      static_friction: 0.65
+      dynamic_friction: 0.50
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.15, 0.45, 0.90]
+    - name: push_goal
+      type: cuboid
+      size: [0.30, 0.30, 0.01]
+      pos: [1.20, 0.00, 0.005]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.95, 0.72, 0.08]
+      regions:
+        - name: goal_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.06]
+          size: [0.30, 0.30, 0.16]
+
+  cameras:
+    - name: main
+      eye: [4.5, -5.0, 3.8]
+      target: [0.30, 0.00, 0.35]
+      width: 960
+      height: 540
+      focal_length: 26.0
+
+  contact_sensors:
+    # The push is accepted only when the moving object has recorded physical
+    # contact with the robot base. This is interaction evidence, not a
+    # navigation acceptance item.
+    - name: push_base_contact
+      body: base_link
+      filter: [push_box]
+  collision_sensors: []
+instruction: >-
+  The robot is already at the push interaction stance. Complete the whole task
+  without grasping: make physical contact with push_box, push it across the floor
+  until it is fully inside the goal_region of push_goal, then stop and leave it
+  there.
+tags:
+  - manipulation
+  - complete_episode
+  - primary

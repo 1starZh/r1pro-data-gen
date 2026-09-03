@@ -1,0 +1,90 @@
+schema_version: task_spec.v2
+id: pickplace.holdout_floor_to_table
+family: pickplace
+scene_human_verified: false
+scene:
+  # Unseen floor-to-table holdout. The ground object sits to the left/front of
+  # the table, with a real gap to both the robot and the table footprint.
+  name: holdout_floor_object_to_table
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [5.0, 5.0]
+    ground_color: [0.20, 0.22, 0.25]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    init_pose: [-0.82, -0.28, 0.0]
+    home_joint_pos: {}
+    navigation_footprint_radius_m: 0.25
+
+  objects:
+    - name: raised_bench
+      type: cuboid
+      size: [0.45, 0.70, 0.10]
+      pos: [0.18, 0.58, 1.0]
+      kinematic: true
+      capabilities: [supports_objects]
+      planning_margin: 0.06
+      color: [0.52, 0.34, 0.18]
+    - name: low_cylinder
+      type: cylinder
+      radius: 0.025
+      height: 0.10
+      pos: [-0.25, 0.02, 0.05]
+      kinematic: false
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.04
+      mass: 0.10
+      static_friction: 1.0
+      dynamic_friction: 1.0
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.12, 0.82, 0.28]
+    - name: brass_landing_marker
+      type: cuboid
+      size: [0.16, 0.16, 0.01]
+      pos: [0.18, 0.48, 1.056]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.95, 0.75, 0.05]
+      regions:
+        - name: landing_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.055]
+          size: [0.16, 0.16, 0.12]
+
+  cameras:
+    - name: main
+      eye: [4.0, -4.8, 3.8]
+      target: [0.0, 0.25, 0.55]
+      width: 960
+      height: 540
+      focal_length: 26.0
+
+  contact_sensors:
+    - name: low_left_finger1
+      body: left_gripper_finger_link1
+      filter: [low_cylinder]
+    - name: low_left_finger2
+      body: left_gripper_finger_link2
+      filter: [low_cylinder]
+    - name: low_right_finger1
+      body: right_gripper_finger_link1
+      filter: [low_cylinder]
+    - name: low_right_finger2
+      body: right_gripper_finger_link2
+      filter: [low_cylinder]
+
+  collision_sensors: []
+instruction: >-
+  Move the movable object that starts on the floor onto the raised support, leave
+  it released and settled fully inside that support's landing region.
+tags:
+  - manipulation
+  - complete_episode
+  - holdout

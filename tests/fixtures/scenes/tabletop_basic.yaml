@@ -1,0 +1,93 @@
+# Basic tabletop geometry fixture for skill and planner tests.
+#
+# This YAML holds *environment facts* only: the robot, static objects, cameras
+# and contact sensors. Task semantics (work pose, grasp offsets, approach
+# direction, place targets) are NOT here -- tests supply only the geometry facts
+# needed to exercise generic skills and planners.
+#
+# Units: meters, kilograms, radians; positions/quaternions in world frame.
+# It is not a TaskSpec and is never a product task entry point.
+
+name: tabletop_basic_fixture
+
+world:
+  gravity: [0.0, 0.0, -9.81]
+  dt: 0.016667              # 60 Hz
+  ground: true
+  ground_size: [20.0, 20.0]
+  ground_color: [0.25, 0.26, 0.28]
+
+robot:
+  asset: asset/r1pro/r1pro.usda
+  init_pose: [0.0, 0.0, 0.0]   # x, y, yaw in world frame
+  # All-zero neutral home (arms hang straight down, gravity-balanced). Joints
+  # not listed here default to 0.0.
+  home_joint_pos:
+    steer_motor_joint1: 0.0
+    steer_motor_joint2: 0.0
+    steer_motor_joint3: 0.0
+    wheel_motor_joint1: 0.0
+    wheel_motor_joint2: 0.0
+    wheel_motor_joint3: 0.0
+    torso_joint1: 0.0
+    torso_joint2: 0.0
+    torso_joint3: 0.0
+    torso_joint4: 0.0
+    left_arm_joint1: 0.0
+    left_arm_joint2: 0.0
+    left_arm_joint3: 0.0
+    left_arm_joint4: 0.0
+    left_arm_joint5: 0.0
+    left_arm_joint6: 0.0
+    left_arm_joint7: 0.0
+    right_arm_joint1: 0.0
+    right_arm_joint2: 0.0
+    right_arm_joint3: 0.0
+    right_arm_joint4: 0.0
+    right_arm_joint5: 0.0
+    right_arm_joint6: 0.0
+    right_arm_joint7: 0.0
+    left_gripper_finger_joint1: 0.0
+    left_gripper_finger_joint2: 0.0
+    right_gripper_finger_joint1: 0.0
+    right_gripper_finger_joint2: 0.0
+
+objects:
+  # Table: kinematic rigid object (cannot be pushed), collision enabled.
+  # Center (0.5, 0.3, 1.0), half-size (0.25, 0.4, 0.05), top surface z = 1.05.
+  - name: table
+    type: cuboid
+    size: [0.5, 0.8, 0.1]
+    pos: [0.5, 0.3, 1.0]
+    kinematic: true
+    color: [0.55, 0.40, 0.15]
+  # Target cylinder: dynamic rigid, normal operation object
+  # (radius 3 cm, height 12 cm, mass 0.1 kg, friction 1.0 max).
+  # z = 1.115 lets it settle onto the table surface (top at 1.05).
+  - name: cylinder
+    type: cylinder
+    radius: 0.03
+    height: 0.12
+    pos: [0.5, 0.15, 1.115]
+    mass: 0.1
+    static_friction: 1.0
+    dynamic_friction: 1.0
+    friction_combine: max
+    contact_offset: 0.008
+    color: [0.0, 0.85, 0.0]
+
+cameras:
+  - name: main
+    eye: [3.5, -3.5, 2.5]
+    target: [0.0, 0.0, 0.8]
+    width: 640
+    height: 480
+    focal_length: 24.0
+
+contact_sensors:
+  - name: left_finger1
+    body: left_gripper_finger_link1
+    filter: [cylinder]
+  - name: left_finger2
+    body: left_gripper_finger_link2
+    filter: [cylinder]

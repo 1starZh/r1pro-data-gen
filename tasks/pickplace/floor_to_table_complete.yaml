@@ -1,0 +1,108 @@
+schema_version: task_spec.v2
+id: pickplace.floor_to_table_complete
+family: pickplace
+scene_human_verified: false
+scene:
+  # Manipulation-only holdout: the robot starts beside a ground object and the
+  # table is within the arm's local workspace. The task tests lift/carry/place,
+  # not a second independent navigation benchmark.
+  name: floor_to_table_manipulation
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [4.0, 4.0]
+    ground_color: [0.20, 0.22, 0.25]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    # Keep the complete chassis outside the source-object collision envelope;
+    # the object remains between the robot and table with a visible physical
+    # gap, rather than only a centre-point gap.
+    init_pose: [-0.80, -0.20, 0.04]
+    home_joint_pos: {}
+    navigation_footprint_radius_m: 0.25
+
+  objects:
+    - name: work_table
+      type: cuboid
+      # The holdout starts in a manipulation-only arrangement.  In the
+      # robot/table direction the object is between the robot and the table;
+      # the table is offset to the side/front so its body does not occupy the
+      # low-torso sweep.  The object is outside the table footprint, leaving a
+      # real gap before the table edge; navigation is outside this episode's
+      # scope.
+      size: [0.40, 0.40, 0.10]
+      pos: [-0.40, 0.55, 1.0]
+      kinematic: true
+      capabilities: [supports_objects]
+      planning_margin: 0.06
+      color: [0.55, 0.40, 0.15]
+    - name: pick_cylinder
+      type: cylinder
+      radius: 0.025
+      height: 0.10
+      # The cylinder is between the robot and the table with a visible clearance
+      # from both: the centre distance to the robot is about 0.63 m, and the
+      # cylinder is 0.125 m south of the table footprint edge at y=0.35.  This
+      # is only an initial-scene contract;
+      # the LLM must still choose the semantic grasp/carry/place sequence.
+      pos: [-0.30, 0.18, 0.05]
+      kinematic: false
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.04
+      mass: 0.10
+      static_friction: 1.0
+      dynamic_friction: 1.0
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.0, 0.85, 0.0]
+    - name: place_target
+      type: cuboid
+      size: [0.16, 0.16, 0.01]
+      pos: [-0.40, 0.45, 1.056]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.95, 0.75, 0.05]
+      regions:
+        - name: place_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.055]
+          size: [0.16, 0.16, 0.12]
+
+  cameras:
+    - name: main
+      eye: [3.8, -4.5, 3.6]
+      target: [0.0, 0.0, 0.55]
+      width: 960
+      height: 540
+      focal_length: 26.0
+
+  contact_sensors:
+    - name: pick_left_finger1
+      body: left_gripper_finger_link1
+      filter: [pick_cylinder]
+    - name: pick_left_finger2
+      body: left_gripper_finger_link2
+      filter: [pick_cylinder]
+    - name: pick_right_finger1
+      body: right_gripper_finger_link1
+      filter: [pick_cylinder]
+    - name: pick_right_finger2
+      body: right_gripper_finger_link2
+      filter: [pick_cylinder]
+
+  collision_sensors: []
+instruction: >-
+  The robot is already at a safe interaction stance beside the ground object.
+  Complete the whole task: grasp pick_cylinder on the floor, lift and carry it
+  to the work_table, place it fully inside the place_region of place_target on
+  that table, release it, and finish with it settled on the table. Do not spend
+  actions on navigation.
+tags:
+  - manipulation
+  - complete_episode
+  - primary

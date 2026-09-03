@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "bindings": {
+    "cylinder": "scene://pick_cylinder",
+    "table": "scene://work_table",
+    "target": "scene://place_target"
+  },
+  "required": [
+    {
+      "predicate": "on_support",
+      "arguments": {
+        "subject": "cylinder",
+        "support": "table",
+        "surface": {"center": [0.0, 0.0, 0.05], "size": [0.4, 0.8]},
+        "subject_half_height_m": 0.05
+      }
+    },
+    {
+      "predicate": "inside_region",
+      "arguments": {
+        "subject": "cylinder",
+        "reference": "target",
+        "region": {"shape": "cuboid", "center": [0.0, 0.0, 0.055], "size": [0.16, 0.16, 0.12]}
+      }
+    }
+  ],
+  "invariants": [
+    {"predicate": "collision_free", "arguments": {"subject": "cylinder"}}
+  ]
+}

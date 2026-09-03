@@ -1,0 +1,94 @@
+# Generic tabletop navigation fixture (far start + path obstacle).
+#
+# The fixture includes a table/cylinder and starts the robot far from the
+# work position (world origin) and a crate blocks the direct path, forcing
+# the navigation planner to route around the obstacle.
+#
+# Units: meters, kilograms, radians; positions in world frame.
+
+name: tabletop_navigation_fixture
+
+world:
+  gravity: [0.0, 0.0, -9.81]
+  dt: 0.016667              # 60 Hz
+  ground: true
+  ground_size: [20.0, 20.0]
+  ground_color: [0.25, 0.26, 0.28]
+
+robot:
+  asset: asset/r1pro/r1pro.usda
+  init_pose: [-1.5, 0.0, 0.0]   # far start, ~1.5 m from the work position
+  home_joint_pos:
+    steer_motor_joint1: 0.0
+    steer_motor_joint2: 0.0
+    steer_motor_joint3: 0.0
+    wheel_motor_joint1: 0.0
+    wheel_motor_joint2: 0.0
+    wheel_motor_joint3: 0.0
+    torso_joint1: 0.0
+    torso_joint2: 0.0
+    torso_joint3: 0.0
+    torso_joint4: 0.0
+    left_arm_joint1: 0.0
+    left_arm_joint2: 0.0
+    left_arm_joint3: 0.0
+    left_arm_joint4: 0.0
+    left_arm_joint5: 0.0
+    left_arm_joint6: 0.0
+    left_arm_joint7: 0.0
+    right_arm_joint1: 0.0
+    right_arm_joint2: 0.0
+    right_arm_joint3: 0.0
+    right_arm_joint4: 0.0
+    right_arm_joint5: 0.0
+    right_arm_joint6: 0.0
+    right_arm_joint7: 0.0
+    left_gripper_finger_joint1: 0.0
+    left_gripper_finger_joint2: 0.0
+    right_gripper_finger_joint1: 0.0
+    right_gripper_finger_joint2: 0.0
+
+objects:
+  # Table: kinematic rigid object, top surface z = 1.05.
+  - name: table
+    type: cuboid
+    size: [0.5, 0.8, 0.1]
+    pos: [0.5, 0.3, 1.0]
+    kinematic: true
+    color: [0.55, 0.40, 0.15]
+  # Target cylinder: dynamic rigid (radius 3 cm, height 12 cm, mass 0.1 kg).
+  - name: cylinder
+    type: cylinder
+    radius: 0.03
+    height: 0.12
+    pos: [0.5, 0.15, 1.115]
+    mass: 0.1
+    static_friction: 1.0
+    dynamic_friction: 1.0
+    friction_combine: max
+    contact_offset: 0.008
+    color: [0.0, 0.85, 0.0]
+  # Path obstacle: a crate between the far start (-1.5, 0) and the work position
+  # (0.05, 0.15), so the direct drive line is blocked and A* must go around.
+  - name: crate
+    type: cuboid
+    size: [0.3, 0.3, 0.6]
+    pos: [-0.7, 0.0, 0.3]
+    kinematic: true
+    color: [0.75, 0.65, 0.45]
+
+cameras:
+  - name: main
+    eye: [3.5, -3.5, 2.5]
+    target: [0.0, 0.0, 0.8]
+    width: 640
+    height: 480
+    focal_length: 24.0
+
+contact_sensors:
+  - name: left_finger1
+    body: left_gripper_finger_link1
+    filter: [cylinder]
+  - name: left_finger2
+    body: left_gripper_finger_link2
+    filter: [cylinder]

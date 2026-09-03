@@ -1,0 +1,158 @@
+schema_version: task_spec.v2
+id: pickplace.tabletop
+family: pickplace
+scene_human_verified: true
+scene:
+  # Task-owned scene variant.  The fence closes the planning arena and the two
+  # alternating internal walls force the base through both doors.
+  name: pickplace_room_room_v1
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [12.0, 10.0]
+    ground_color: [0.20, 0.22, 0.25]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    init_pose: [-3.80, -2.40, 0.0]
+    home_joint_pos: {}
+    # Match the validated room navigation contract used by base_navigate_to.
+    # 0.25 keeps the inflated table boundary 0.40 m from the table edge, so the
+    # west approach candidates sit inside a navigation-free cell with margin even
+    # if the floating base drifts a few millimetres after reset.  A 0.30
+    # footprint placed them exactly on a cell boundary where a ~1 mm base drift
+    # flipped the free/blocked verdict.
+    navigation_footprint_radius_m: 0.25
+
+  objects:
+    # Closed perimeter: outside bypasses are not part of the free space.
+    - name: fence_north
+      type: cuboid
+      size: [12.0, 0.30, 1.20]
+      pos: [0.0, 3.75, 0.60]
+      kinematic: true
+      color: [0.18, 0.19, 0.23]
+    - name: fence_south
+      type: cuboid
+      size: [12.0, 0.30, 1.20]
+      pos: [0.0, -3.75, 0.60]
+      kinematic: true
+      color: [0.18, 0.19, 0.23]
+    - name: fence_west
+      type: cuboid
+      size: [0.30, 7.20, 1.20]
+      pos: [-5.85, 0.0, 0.60]
+      kinematic: true
+      color: [0.18, 0.19, 0.23]
+    - name: fence_east
+      type: cuboid
+      size: [0.30, 7.20, 1.20]
+      pos: [5.85, 0.0, 0.60]
+      kinematic: true
+      color: [0.18, 0.19, 0.23]
+
+    # Lower partition leaves a 1.9 m door on the right side.
+    - name: room_wall_lower_left
+      type: cuboid
+      size: [4.10, 0.26, 1.20]
+      pos: [-2.75, -1.00, 0.60]
+      kinematic: true
+      color: [0.86, 0.30, 0.12]
+    - name: room_wall_lower_right
+      type: cuboid
+      size: [3.60, 0.26, 1.20]
+      pos: [3.00, -1.00, 0.60]
+      kinematic: true
+      color: [0.86, 0.30, 0.12]
+
+    # Upper partition leaves a 1.5 m door on the left side.
+    - name: room_wall_upper_left
+      type: cuboid
+      size: [3.30, 0.26, 1.20]
+      pos: [-3.15, 1.00, 0.60]
+      kinematic: true
+      color: [0.12, 0.48, 0.86]
+    - name: room_wall_upper_right
+      type: cuboid
+      size: [4.80, 0.26, 1.20]
+      pos: [2.40, 1.00, 0.60]
+      kinematic: true
+      color: [0.12, 0.48, 0.86]
+
+    # Work room: the cylinder is on the robot-left side (+world y at yaw=0).
+    - name: work_table
+      type: cuboid
+      size: [0.40, 0.80, 0.10]
+      pos: [1.90, 2.10, 1.00]
+      kinematic: true
+      capabilities: [supports_objects]
+      planning_margin: 0.06
+      color: [0.55, 0.40, 0.15]
+    - name: pick_cylinder
+      type: cylinder
+      # Keep the object within the verified R1Pro fingertip collision envelope.
+      # A 6 cm x 12 cm cylinder reaches into the palm mesh and is pushed away
+      # before the two finger sensors can register a pinch.
+      radius: 0.025
+      height: 0.10
+      pos: [1.90, 2.25, 1.10]
+      # The cylinder is a real dynamic body: it rests on the table, generates
+      # two-finger contact, and follows the measured grasp constraint only after
+      # contact is verified. A kinematic body ignored runtime pose writes and
+      # stayed on the table while the arm lifted.
+      kinematic: false
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.04
+      mass: 0.10
+      static_friction: 1.0
+      dynamic_friction: 1.0
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.0, 0.85, 0.0]
+    - name: place_target
+      type: cuboid
+      size: [0.16, 0.16, 0.01]
+      pos: [1.90, 2.05, 1.056]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.95, 0.75, 0.05]
+      # Accepted placement region for objects resting on this target (local frame).
+      # A 12 cm tall object centred on the target sits at local z ~= 0.055.
+      regions:
+        - name: place_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.055]
+          size: [0.16, 0.16, 0.12]
+
+  cameras:
+    - name: main
+      eye: [7.4, -8.5, 8.0]
+      target: [0.0, 0.30, 0.45]
+      width: 960
+      height: 540
+      focal_length: 26.0
+
+  contact_sensors:
+    - name: pick_left_finger1
+      body: left_gripper_finger_link1
+      filter: [pick_cylinder]
+    - name: pick_left_finger2
+      body: left_gripper_finger_link2
+      filter: [pick_cylinder]
+    - name: pick_right_finger1
+      body: right_gripper_finger_link1
+      filter: [pick_cylinder]
+    - name: pick_right_finger2
+      body: right_gripper_finger_link2
+      filter: [pick_cylinder]
+instruction: >-
+  Navigate to the table if needed, grasp pick_cylinder, carry it into the
+  place_region of place_target, release it, and finish with the object settled
+  there.
+tags:
+  - manipulation
+  - primary

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "bindings": {
+    "cylinder": "scene://pick_cylinder",
+    "table": "scene://work_table",
+    "target": "scene://place_target"
+  },
+  "required": [
+    {
+      "predicate": "inside_region",
+      "arguments": {
+        "subject": "cylinder",
+        "reference": "target",
+        "region": {"shape": "cuboid", "center": [0.0, 0.0, 0.060], "size": [0.16, 0.16, 0.12]}
+      }
+    }
+  ],
+  "invariants": []
+}

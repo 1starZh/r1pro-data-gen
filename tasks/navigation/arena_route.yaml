@@ -1,0 +1,97 @@
+schema_version: task_spec.v2
+id: navigation.arena_route
+family: navigation
+scene_human_verified: false
+scene:
+  # Navigation showcase: a closed arena with an internal two-gate obstacle field.
+  #
+  # The fence spans the complete planning window, so the robot cannot escape
+  # around the outside of the obstacle field. The two internal barriers expose
+  # alternating openings and force the route to cross the arena interior.
+
+  name: navigation_showcase
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [12.5, 10.0]
+    ground_color: [0.20, 0.22, 0.25]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    init_pose: [-3.8, -2.4, 0.0]
+    home_joint_pos: {}
+
+  objects:
+    # Closed perimeter fence. The long dimensions intentionally extend beyond
+    # the planner's padded bounding box, preventing an outside bypass.
+    - name: fence_north
+      type: cuboid
+      size: [12.0, 0.30, 0.8]
+      pos: [0.0, 3.55, 0.4]
+      kinematic: true
+      color: [0.20, 0.20, 0.24]
+    - name: fence_south
+      type: cuboid
+      size: [12.0, 0.30, 0.8]
+      pos: [0.0, -3.55, 0.4]
+      kinematic: true
+      color: [0.20, 0.20, 0.24]
+    - name: fence_west
+      type: cuboid
+      size: [0.30, 8.0, 0.8]
+      pos: [-5.0, 0.0, 0.4]
+      kinematic: true
+      color: [0.20, 0.20, 0.24]
+    - name: fence_east
+      type: cuboid
+      size: [0.30, 8.0, 0.8]
+      pos: [5.0, 0.0, 0.4]
+      kinematic: true
+      color: [0.20, 0.20, 0.24]
+
+    # First internal barrier: opening on the right side.
+    - name: gate1_left
+      type: cuboid
+      size: [3.6, 0.45, 0.8]
+      pos: [-2.5, -0.9, 0.4]
+      kinematic: true
+      color: [0.88, 0.30, 0.12]
+    - name: gate1_right
+      type: cuboid
+      size: [2.0, 0.45, 0.8]
+      pos: [3.2, -0.9, 0.4]
+      kinematic: true
+      color: [0.88, 0.30, 0.12]
+
+    # Second internal barrier: opening on the left side. Together with the
+    # first gate this creates a visible left-right slalom inside the fence.
+    - name: gate2_left
+      type: cuboid
+      size: [2.0, 0.45, 0.8]
+      pos: [-3.2, 0.9, 0.4]
+      kinematic: true
+      color: [0.12, 0.48, 0.86]
+    - name: gate2_right
+      type: cuboid
+      size: [3.6, 0.45, 0.8]
+      pos: [2.5, 0.9, 0.4]
+      kinematic: true
+      color: [0.12, 0.48, 0.86]
+
+  cameras:
+    - name: main
+      eye: [6.8, -8.5, 9.0]
+      target: [0.0, 0.0, 0.30]
+      width: 640
+      height: 480
+      focal_length: 24.0
+
+  contact_sensors: []
+instruction: >-
+  Navigate the robot through the arena and finish near the north-east goal pose
+  [3.8, 2.6, 0.0], remaining inside the arena and avoiding every obstacle.
+tags:
+  - navigation
+  - primary

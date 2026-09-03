@@ -1,0 +1,153 @@
+schema_version: task_spec.v2
+id: rearrangement.three_objects_complete
+family: rearrangement
+scene_human_verified: false
+scene:
+  # Manipulation-only holdout for independent multi-object rearrangement. All
+  # objects and targets share one local workspace; navigation is not an
+  # acceptance item for this family.
+  name: multi_rearrangement_manipulation
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [4.0, 4.0]
+    ground_color: [0.22, 0.24, 0.27]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    init_pose: [-0.40, 0.0, 0.0]
+    home_joint_pos: {}
+    navigation_footprint_radius_m: 0.25
+
+  objects:
+    - name: ground_support
+      type: cuboid
+      size: [2.0, 2.0, 0.02]
+      pos: [0.0, 0.0, 0.01]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [supports_objects]
+      color: [0.32, 0.34, 0.37]
+    - name: rearrange_red
+      type: cuboid
+      size: [0.08, 0.08, 0.12]
+      pos: [0.00, 0.20, 0.07]
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.03
+      mass: 0.12
+      static_friction: 0.80
+      dynamic_friction: 0.65
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.90, 0.10, 0.10]
+    - name: rearrange_blue
+      type: cuboid
+      size: [0.08, 0.08, 0.12]
+      pos: [0.00, -0.20, 0.07]
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.03
+      mass: 0.12
+      static_friction: 0.80
+      dynamic_friction: 0.65
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.10, 0.30, 0.90]
+    - name: rearrange_green
+      type: cuboid
+      size: [0.08, 0.08, 0.12]
+      pos: [0.10, 0.20, 0.07]
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.03
+      mass: 0.12
+      static_friction: 0.80
+      dynamic_friction: 0.65
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.10, 0.80, 0.20]
+    - name: rearrange_red_goal
+      type: cuboid
+      size: [0.24, 0.24, 0.01]
+      pos: [0.20, 0.20, 0.005]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.95, 0.35, 0.35]
+      regions:
+        - name: goal_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.065]
+          size: [0.24, 0.24, 0.14]
+    - name: rearrange_blue_goal
+      type: cuboid
+      size: [0.24, 0.24, 0.01]
+      pos: [0.20, -0.20, 0.005]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.35, 0.50, 0.95]
+      regions:
+        - name: goal_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.065]
+          size: [0.24, 0.24, 0.14]
+    - name: rearrange_green_goal
+      type: cuboid
+      size: [0.24, 0.24, 0.01]
+      pos: [0.10, 0.0, 0.005]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.35, 0.90, 0.45]
+      regions:
+        - name: goal_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.065]
+          size: [0.24, 0.24, 0.14]
+
+  cameras:
+    - name: main
+      eye: [3.8, -4.5, 3.6]
+      target: [0.0, 0.0, 0.35]
+      width: 960
+      height: 540
+      focal_length: 26.0
+
+  contact_sensors:
+    - name: rearrange_red_left
+      body: left_gripper_finger_link1
+      filter: [rearrange_red]
+    - name: rearrange_red_right
+      body: right_gripper_finger_link1
+      filter: [rearrange_red]
+    - name: rearrange_blue_left
+      body: left_gripper_finger_link1
+      filter: [rearrange_blue]
+    - name: rearrange_blue_right
+      body: right_gripper_finger_link1
+      filter: [rearrange_blue]
+    - name: rearrange_green_left
+      body: left_gripper_finger_link1
+      filter: [rearrange_green]
+    - name: rearrange_green_right
+      body: right_gripper_finger_link1
+      filter: [rearrange_green]
+
+  collision_sensors: []
+instruction: >-
+  The robot is already at a safe interaction stance. Complete the whole
+  rearrangement task: move rearrange_red into the goal_region of
+  rearrange_red_goal, rearrange_blue into the goal_region of
+  rearrange_blue_goal, and rearrange_green into the goal_region of
+  rearrange_green_goal. Grasp, carry, place, and release every object; finish
+  only when all three objects are released and settled in their own distinct
+  target regions. The goals are independent, with no stacking requirement and
+  no required execution order. Do not spend actions on navigation.
+tags:
+  - manipulation
+  - complete_episode
+  - primary

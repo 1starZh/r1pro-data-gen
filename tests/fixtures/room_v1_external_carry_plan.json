@@ -1,0 +1,255 @@
+{
+  "task_name": "pickplace_room_external_carry_fixture",
+  "stages": [
+    {
+      "name": "navigate_to_table",
+      "goal": "Navigate the mobile base to the work table.",
+      "depends_on": [],
+      "parameters": {
+        "skill": "base_navigate_to",
+        "target": [1.35, 1.9, 0.0],
+        "footprint_radius": 0.3,
+        "motion_mode": "forward"
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "lock_manipulation_joints",
+      "goal": "Hold the base and non-manipulation joints while the arm works.",
+      "depends_on": ["navigate_to_table"],
+      "parameters": {
+        "skill": "joint_mask_lock",
+        "mask_mode": "allow",
+        "joint_groups": ["left_arm", "left_gripper"],
+        "lock_root": true,
+        "stiffness_scale": 1.0,
+        "settle_steps": 30
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "open_gripper",
+      "goal": "Open the left gripper before approaching the object.",
+      "depends_on": ["lock_manipulation_joints"],
+      "parameters": {
+        "skill": "gripper_set",
+        "open_value": 0.05,
+        "side": "left"
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "move_to_pregrasp",
+      "goal": "Move the gripper midpoint above the live scene object position.",
+      "depends_on": ["open_gripper"],
+      "parameters": {
+        "skill": "arm_move_to",
+        "target_pos": {
+          "ref": "scene.object.pick_cylinder.position",
+          "value_type": "array",
+          "shape": [3],
+          "frame": "base",
+          "offset": [0.0, 0.0, 0.13]
+        },
+        "target_quat": [0.707, 0.0, -0.707, 0.0],
+        "target_frame": "grasp_center",
+        "side": "left",
+        "planning_time": 1.0,
+        "ik_candidates": 4,
+        "trajectory_speed_scale": 0.12,
+        "local_radius_m": 2.0,
+        "exclude_objects": ["pick_cylinder"]
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "align_gripper",
+      "goal": "Use measured contact geometry to center the gripper on the cylinder.",
+      "depends_on": ["move_to_pregrasp"],
+      "parameters": {
+        "skill": "arm_align_gripper",
+        "object_name": "pick_cylinder",
+        "side": "left",
+        "require_vertical_alignment": true,
+        "max_iterations": 12,
+        "position_tolerance": 0.012,
+        "trajectory_speed_scale": 0.07,
+        "planning_time": 1.2,
+        "ik_candidates": 3,
+        "local_radius_m": 2.0,
+        "exclude_objects": ["pick_cylinder", "work_table"]
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "grasp_cylinder",
+      "goal": "Close the gripper and attach the cylinder only after two-sided contact.",
+      "depends_on": ["align_gripper"],
+      "parameters": {
+        "skill": "gripper_grasp",
+        "max_close": 0.05,
+        "contact_threshold": 0.2,
+        "step": 0.002,
+        "side": "left",
+        "object_name": "pick_cylinder"
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "query_lift_pose",
+      "goal": "Read the live end-effector pose after the grasp is verified.",
+      "depends_on": ["grasp_cylinder"],
+      "parameters": {
+        "skill": "query_ee_pose",
+        "side": "left"
+      },
+      "outputs": ["position", "quaternion"],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "lift_cylinder",
+      "goal": "Lift using a relative offset from the measured post-grasp pose.",
+      "depends_on": ["query_lift_pose"],
+      "parameters": {
+        "skill": "arm_move_to",
+        "target_pos": {
+          "ref": "stage.query_lift_pose.details.position",
+          "value_type": "array",
+          "shape": [3],
+          "frame": "base",
+          "offset": [0.0, 0.0, 0.05]
+        },
+        "target_quat": {
+          "ref": "stage.query_lift_pose.details.quaternion",
+          "value_type": "array",
+          "shape": [4]
+        },
+        "target_frame": "ee",
+        "side": "left",
+        "planning_time": 1.0,
+        "ik_candidates": 4,
+        "trajectory_speed_scale": 0.10,
+        "local_radius_m": 2.0,
+        "exclude_objects": ["pick_cylinder", "work_table"]
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "carry_cylinder",
+      "goal": "Carry the physically attached cylinder through a live collision-checked path to the target region.",
+      "depends_on": ["lift_cylinder"],
+      "parameters": {
+        "skill": "arm_carry_object_to",
+        "object_name": "pick_cylinder",
+        "target_region_name": "place_target",
+        "support_surface_name": "work_table",
+        "side": "left",
+        "clearance_m": 0.13,
+        "retract_distance_m": 0.12,
+        "inward_offset_m": 0.03,
+        "yaw_offsets_rad": [0.0, 0.12, -0.12, 0.24, -0.24],
+        "planning_time": 1.0,
+        "ik_candidates_per_waypoint": 4,
+        "beam_width": 3,
+        "max_planned_edges": 72,
+        "trajectory_speed_scale": 0.10,
+        "descend_speed_scale": 0.08,
+        "local_radius_m": 2.0,
+        "place_xy_tolerance_m": 0.06,
+        "place_z_tolerance_m": 0.06
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "release_cylinder",
+      "goal": "Release the cylinder at the target region.",
+      "depends_on": ["carry_cylinder"],
+      "parameters": {
+        "skill": "gripper_set",
+        "open_value": 0.05,
+        "side": "left",
+        "object_name": "pick_cylinder"
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "query_retreat_pose",
+      "goal": "Read the live end-effector pose after release.",
+      "depends_on": ["release_cylinder"],
+      "parameters": {
+        "skill": "query_ee_pose",
+        "side": "left"
+      },
+      "outputs": ["position", "quaternion"],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "retreat_arm",
+      "goal": "Retreat vertically from the measured release pose.",
+      "depends_on": ["query_retreat_pose"],
+      "parameters": {
+        "skill": "arm_move_to",
+        "target_pos": {
+          "ref": "stage.query_retreat_pose.details.position",
+          "value_type": "array",
+          "shape": [3],
+          "frame": "base",
+          "offset": [0.0, 0.0, 0.10]
+        },
+        "target_quat": {
+          "ref": "stage.query_retreat_pose.details.quaternion",
+          "value_type": "array",
+          "shape": [4]
+        },
+        "target_frame": "ee",
+        "side": "left",
+        "planning_time": 1.0,
+        "ik_candidates": 4,
+        "trajectory_speed_scale": 0.10,
+        "local_radius_m": 2.0,
+        "exclude_objects": ["pick_cylinder", "work_table"]
+      },
+      "outputs": [],
+      "preconditions": [],
+      "postconditions": []
+    },
+    {
+      "name": "verify_placement",
+      "goal": "Read the dynamic object pose for task-level placement evaluation.",
+      "depends_on": ["retreat_arm"],
+      "parameters": {
+        "skill": "query_object_pose",
+        "object_name": "pick_cylinder"
+      },
+      "outputs": ["position"],
+      "preconditions": [],
+      "postconditions": []
+    }
+  ],
+  "metadata": {
+    "source": "external_llm_fixture",
+    "scene": "room_v1",
+    "prompt_version": "carry-v1",
+    "notes": "Canonical runtime fixture for the external generic-skill path; not fresh provider output."
+  }
+}

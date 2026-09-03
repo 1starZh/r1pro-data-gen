@@ -1,0 +1,185 @@
+# Formal task-level gate after the independent navigation gate.
+#
+# Every rollout below is one complete manipulation episode. Each scene starts
+# at an authored safe interaction stance, so navigation is not an acceptance
+# item and does not consume the task-completion budget. A sample counts only
+# when every requested interaction, placement/release, and settling predicate
+# is satisfied in the same episode.
+schema_version: benchmark_suite.v1
+name: complete_task_episodes
+acceptance_unit: complete_episode
+seed: 20260828
+min_rollouts_per_family: 10
+min_success_rate: 0.8
+
+families:
+  - name: single_object_pick_place
+    cases:
+      - id: tabletop_cylinder_complete
+        task: pickplace.tabletop_complete
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 64
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.0
+            yaw_range_rad: 0.0
+          objects:
+            - match:
+                names:
+                  [room_wall_lower_left, room_wall_lower_right,
+                   room_wall_upper_left, room_wall_upper_right]
+              xy_radius_m: 0.025
+              yaw_range_rad: 0.015
+            - match: {role: support}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.02
+            - match: {role: object}
+              xy_radius_m: 0.018
+              yaw_range_rad: 0.10
+            - match: {role: target}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.10
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.90, 1.10]
+              contact_offset_scale: [0.95, 1.05]
+
+  - name: planar_push
+    cases:
+      - id: box_to_region_complete
+        task: push.box_to_region_complete
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 64
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.0
+            yaw_range_rad: 0.0
+          objects:
+            - match: {role: object}
+              xy_radius_m: 0.10
+              yaw_range_rad: 0.20
+            - match: {role: target}
+              xy_radius_m: 0.12
+              yaw_range_rad: 0.20
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.85, 1.15]
+              contact_offset_scale: [0.95, 1.05]
+
+  - name: floor_to_table
+    cases:
+      - id: ground_cylinder_to_table_complete
+        task: pickplace.floor_to_table_complete
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 96
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.0
+            yaw_range_rad: 0.0
+          objects:
+            - match: {role: support}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.02
+            - match: {role: object}
+              xy_radius_m: 0.08
+              yaw_range_rad: 0.10
+            - match: {role: target}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.10
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.90, 1.10]
+              contact_offset_scale: [0.95, 1.05]
+
+  - name: independent_multi_object_rearrangement
+    cases:
+      - id: three_objects_three_targets_complete
+        task: rearrangement.three_objects_complete
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 128
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.0
+            yaw_range_rad: 0.0
+          objects:
+            - match: {role: object}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.10
+            - match: {role: target}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.10
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.90, 1.10]
+              contact_offset_scale: [0.95, 1.05]
+
+holdout_families:
+  # Holdouts are executed only after every primary family passes its complete
+  # episode gate. They use distinct scene/entity names and independent seeds.
+  - name: holdout_pick_place_no_nav
+    cases:
+      - id: unseen_prism_on_slate
+        task: pickplace.holdout_prism_on_slate
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 64
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.0
+            yaw_range_rad: 0.0
+          objects:
+            - match: {role: support}
+              xy_radius_m: 0.035
+              yaw_range_rad: 0.03
+            - match: {role: object}
+              xy_radius_m: 0.018
+              yaw_range_rad: 0.10
+            - match: {role: target}
+              xy_radius_m: 0.035
+              yaw_range_rad: 0.10
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.90, 1.10]
+              contact_offset_scale: [0.95, 1.05]
+
+  - name: holdout_floor_to_table
+    cases:
+      - id: unseen_low_cylinder_to_bench
+        task: pickplace.holdout_floor_to_table
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 96
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.025
+            yaw_range_rad: 0.04
+          objects:
+            - match: {role: support}
+              xy_radius_m: 0.035
+              yaw_range_rad: 0.03
+            - match: {role: object}
+              xy_radius_m: 0.06
+              yaw_range_rad: 0.10
+            - match: {role: target}
+              xy_radius_m: 0.035
+              yaw_range_rad: 0.10
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.90, 1.10]
+              contact_offset_scale: [0.95, 1.05]

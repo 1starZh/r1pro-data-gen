@@ -1,0 +1,93 @@
+schema_version: task_spec.v2
+id: pickplace.tabletop_complete
+family: pickplace
+scene_human_verified: true
+scene:
+  # Tabletop cylinder holdout. The robot starts about 2 m west of the table
+  # edge, facing the table, then navigates in and completes grasp/place/release.
+  name: tabletop_cylinder_manipulation
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [8.0, 6.0]
+    ground_color: [0.20, 0.22, 0.25]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    # Table west edge is x=-0.20; this pose is 2.0 m further west, yaw +x.
+    init_pose: [-2.20, 0.0, 0.0]
+    home_joint_pos: {}
+    navigation_footprint_radius_m: 0.25
+
+  objects:
+    - name: work_table
+      type: cuboid
+      size: [0.40, 0.80, 0.10]
+      pos: [0.0, 0.0, 1.0]
+      kinematic: true
+      capabilities: [supports_objects]
+      planning_margin: 0.06
+      color: [0.55, 0.40, 0.15]
+    - name: pick_cylinder
+      type: cylinder
+      radius: 0.025
+      height: 0.10
+      pos: [0.006, 0.144, 1.10]
+      kinematic: false
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.04
+      mass: 0.098409
+      static_friction: 0.913599
+      dynamic_friction: 1.00475
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.0, 0.85, 0.0]
+    - name: place_target
+      type: cuboid
+      size: [0.16, 0.16, 0.01]
+      pos: [0.002, -0.0715, 1.056]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.95, 0.75, 0.05]
+      regions:
+        - name: place_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.055]
+          size: [0.16, 0.16, 0.12]
+
+  cameras:
+    - name: main
+      eye: [1.6, -5.4, 3.2]
+      target: [-1.1, 0.0, 0.55]
+      width: 960
+      height: 540
+      focal_length: 24.0
+
+  contact_sensors:
+    - name: pick_left_finger1
+      body: left_gripper_finger_link1
+      filter: [pick_cylinder]
+    - name: pick_left_finger2
+      body: left_gripper_finger_link2
+      filter: [pick_cylinder]
+    - name: pick_right_finger1
+      body: right_gripper_finger_link1
+      filter: [pick_cylinder]
+    - name: pick_right_finger2
+      body: right_gripper_finger_link2
+      filter: [pick_cylinder]
+
+  collision_sensors: []
+instruction: >-
+  The robot starts about 2 m west of the table. Navigate to a reachable
+  pregrasp stance, grasp pick_cylinder, carry it to the place_region of
+  place_target, place it fully inside that region, release it, and finish with
+  the object settled there.
+tags:
+  - manipulation
+  - complete_episode
+  - primary

@@ -1,0 +1,100 @@
+"""Pure Python domain models for the R1Pro data-generation pipeline.
+
+This package deliberately contains no filesystem or simulator orchestration.
+Plan serialization lives in :mod:`r1pro_data_gen.data.plan_io`; scene-file
+loading lives in :mod:`r1pro_data_gen.data.scenes`.
+"""
+
+from .evidence import (
+    AttachmentEvent,
+    ContactEvent,
+    EntityState,
+    EvidenceBundle,
+    EvidenceFrame,
+    evidence_from_dict,
+    evidence_to_dict,
+)
+from .models import (
+    ControlCommand,
+    ControlMode,
+    FailureEvidence,
+    Observation,
+    Plan,
+    PlanStage,
+    TaskResult,
+    TaskStatus,
+    Trajectory,
+    TrajectoryPoint,
+)
+from .grasp import GraspContext
+from .goals import (
+    ALLOWED_GOAL_PREDICATES,
+    GOAL_SPEC_SCHEMA_VERSION,
+    GoalPredicate,
+    GoalSpec,
+    goal_spec_sha256,
+    goal_spec_to_dict,
+    parse_goal_spec,
+)
+from .scene import (
+    CameraModel,
+    ContactSensorModel,
+    ObjectCapability,
+    ObjectModel,
+    ObjectType,
+    PhysicsProps,
+    RegionModel,
+    RobotModel,
+    SceneModel,
+    SurfaceModel,
+    VisualProps,
+    WorldModel,
+    object_surface_distance_m,
+    object_xy_half_extents_m,
+    object_vertical_extent_m,
+    object_xy_radius_m,
+)
+
+__all__ = [
+    "ALLOWED_GOAL_PREDICATES",
+    "AttachmentEvent",
+    "CameraModel",
+    "ContactEvent",
+    "ContactSensorModel",
+    "ControlCommand",
+    "ControlMode",
+    "EntityState",
+    "EvidenceBundle",
+    "EvidenceFrame",
+    "FailureEvidence",
+    "GOAL_SPEC_SCHEMA_VERSION",
+    "GoalPredicate",
+    "GoalSpec",
+    "GraspContext",
+    "ObjectCapability",
+    "ObjectModel",
+    "ObjectType",
+    "Observation",
+    "PhysicsProps",
+    "Plan",
+    "PlanStage",
+    "RegionModel",
+    "RobotModel",
+    "SceneModel",
+    "SurfaceModel",
+    "TaskResult",
+    "TaskStatus",
+    "Trajectory",
+    "TrajectoryPoint",
+    "VisualProps",
+    "WorldModel",
+    "object_surface_distance_m",
+    "object_xy_half_extents_m",
+    "object_vertical_extent_m",
+    "object_xy_radius_m",
+    "evidence_from_dict",
+    "evidence_to_dict",
+    "goal_spec_sha256",
+    "goal_spec_to_dict",
+    "parse_goal_spec",
+]

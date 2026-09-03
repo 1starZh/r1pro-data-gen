@@ -1,0 +1,90 @@
+schema_version: task_spec.v2
+id: pickplace.holdout_prism_on_slate
+family: pickplace
+scene_human_verified: false
+scene:
+  # Unseen manipulation holdout. The task is intentionally expressed outside
+  # this file; the scene only supplies semantic roles, geometry, and physical
+  # sensors. Navigation is outside this family's acceptance unit.
+  name: holdout_pickplace_no_nav
+
+  world:
+    gravity: [0.0, 0.0, -9.81]
+    dt: 0.016667
+    ground: true
+    ground_size: [4.0, 4.0]
+    ground_color: [0.20, 0.22, 0.25]
+
+  robot:
+    asset: asset/r1pro/r1pro.usda
+    init_pose: [-0.62, 0.05, 0.0]
+    home_joint_pos: {}
+    navigation_footprint_radius_m: 0.25
+
+  objects:
+    - name: slate_platform
+      type: cuboid
+      size: [0.45, 0.75, 0.10]
+      pos: [0.0, 0.0, 1.0]
+      kinematic: true
+      capabilities: [supports_objects]
+      planning_margin: 0.06
+      color: [0.30, 0.34, 0.42]
+    - name: grasp_prism
+      type: cuboid
+      size: [0.04, 0.04, 0.10]
+      pos: [0.08, 0.17, 1.10]
+      kinematic: false
+      rigid_object: true
+      capabilities: [movable, graspable]
+      planning_margin: 0.04
+      mass: 0.10
+      static_friction: 1.0
+      dynamic_friction: 1.0
+      friction_combine: max
+      contact_offset: 0.008
+      color: [0.20, 0.55, 0.95]
+    - name: amber_drop_zone
+      type: cuboid
+      size: [0.16, 0.16, 0.01]
+      pos: [0.0, -0.10, 1.056]
+      kinematic: true
+      collision_enabled: false
+      capabilities: [contains_objects]
+      color: [0.95, 0.65, 0.08]
+      regions:
+        - name: placement_region
+          shape: cuboid
+          center: [0.0, 0.0, 0.055]
+          size: [0.16, 0.16, 0.12]
+
+  cameras:
+    - name: main
+      eye: [3.8, -4.5, 3.6]
+      target: [0.0, 0.0, 0.55]
+      width: 960
+      height: 540
+      focal_length: 26.0
+
+  contact_sensors:
+    - name: grasp_left_finger1
+      body: left_gripper_finger_link1
+      filter: [grasp_prism]
+    - name: grasp_left_finger2
+      body: left_gripper_finger_link2
+      filter: [grasp_prism]
+    - name: grasp_right_finger1
+      body: right_gripper_finger_link1
+      filter: [grasp_prism]
+    - name: grasp_right_finger2
+      body: right_gripper_finger_link2
+      filter: [grasp_prism]
+
+  collision_sensors: []
+instruction: >-
+  Pick up the movable object on the slate platform and leave it released and
+  settled fully inside the placement region of the amber landing marker.
+tags:
+  - manipulation
+  - complete_episode
+  - holdout

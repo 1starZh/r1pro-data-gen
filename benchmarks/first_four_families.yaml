@@ -1,0 +1,113 @@
+# Formal first-gate suite.  Each case produces ten independently seeded,
+# feasibility-gated scene instances.  The suite is intentionally data-only:
+# no family below selects a Python policy or evaluator.
+schema_version: benchmark_suite.v1
+name: first_four_task_families
+seed: 20260828
+min_rollouts_per_family: 10
+min_success_rate: 0.8
+
+families:
+  - name: navigation
+    cases:
+      - id: arena_route
+        task: navigation.arena_route
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 64
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.45
+            yaw_range_rad: 3.141592653589793
+          objects:
+            # Perimeter walls are structural boundaries and remain fixed;
+            # internal barriers receive a small generic pose perturbation.
+            - match:
+                names: [gate1_left, gate1_right, gate2_left, gate2_right]
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.025
+
+  - name: single_object_pick_place
+    cases:
+      - id: tabletop_cylinder
+        task: pickplace.tabletop
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 64
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.45
+            yaw_range_rad: 3.141592653589793
+          objects:
+            - match:
+                names:
+                  [room_wall_lower_left, room_wall_lower_right,
+                   room_wall_upper_left, room_wall_upper_right]
+              xy_radius_m: 0.025
+              yaw_range_rad: 0.015
+            - match: {role: support}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.02
+            - match: {role: object}
+              xy_radius_m: 0.018
+              yaw_range_rad: 0.10
+            - match: {role: target}
+              xy_radius_m: 0.04
+              yaw_range_rad: 0.10
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.90, 1.10]
+              contact_offset_scale: [0.95, 1.05]
+
+  - name: independent_multi_object_rearrangement
+    cases:
+      - id: three_objects_three_targets
+        task: rearrangement.three_objects
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 96
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.45
+            yaw_range_rad: 3.141592653589793
+          objects:
+            - match: {role: object}
+              xy_radius_m: 0.12
+              yaw_range_rad: 0.20
+            - match: {role: target}
+              xy_radius_m: 0.12
+              yaw_range_rad: 0.20
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.90, 1.10]
+              contact_offset_scale: [0.95, 1.05]
+
+  - name: planar_push
+    cases:
+      - id: box_to_region
+        task: push.box_to_region
+        count: 10
+        randomization:
+          schema_version: scene_randomization.v1
+          max_attempts: 64
+          preserve_relations: true
+          robot:
+            xy_radius_m: 0.35
+            yaw_range_rad: 3.141592653589793
+          objects:
+            - match: {role: object}
+              xy_radius_m: 0.10
+              yaw_range_rad: 0.20
+            - match: {role: target}
+              xy_radius_m: 0.12
+              yaw_range_rad: 0.20
+          physics:
+            - match: {role: object}
+              mass_scale: [0.90, 1.10]
+              friction_scale: [0.85, 1.15]
+              contact_offset_scale: [0.95, 1.05]

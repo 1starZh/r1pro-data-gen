@@ -1,0 +1,60 @@
+# Navigation verification scene: one obstacle blocks the direct route.
+name: navigation_obstacle
+
+world:
+  gravity: [0.0, 0.0, -9.81]
+  dt: 0.016667
+  ground: true
+  ground_size: [20.0, 20.0]
+  ground_color: [0.25, 0.26, 0.28]
+
+robot:
+  asset: asset/r1pro/r1pro.usda
+  init_pose: [-1.5, 0.0, 0.0]
+  home_joint_pos:
+    steer_motor_joint1: 0.0
+    steer_motor_joint2: 0.0
+    steer_motor_joint3: 0.0
+    wheel_motor_joint1: 0.0
+    wheel_motor_joint2: 0.0
+    wheel_motor_joint3: 0.0
+    torso_joint1: 0.0
+    torso_joint2: 0.0
+    torso_joint3: 0.0
+    torso_joint4: 0.0
+    left_arm_joint1: 0.0
+    left_arm_joint2: 0.0
+    left_arm_joint3: 0.0
+    left_arm_joint4: 0.0
+    left_arm_joint5: 0.0
+    left_arm_joint6: 0.0
+    left_arm_joint7: 0.0
+    right_arm_joint1: 0.0
+    right_arm_joint2: 0.0
+    right_arm_joint3: 0.0
+    right_arm_joint4: 0.0
+    right_arm_joint5: 0.0
+    right_arm_joint6: 0.0
+    right_arm_joint7: 0.0
+    left_gripper_finger_joint1: 0.0
+    left_gripper_finger_joint2: 0.0
+    right_gripper_finger_joint1: 0.0
+    right_gripper_finger_joint2: 0.0
+
+objects:
+  - name: crate
+    type: cuboid
+    size: [0.4, 0.5, 0.8]
+    pos: [0.0, 0.0, 0.4]
+    kinematic: true
+    color: [0.75, 0.45, 0.15]
+
+cameras:
+  - name: main
+    eye: [3.2, -4.2, 3.0]
+    target: [0.0, 0.0, 0.4]
+    width: 640
+    height: 480
+    focal_length: 24.0
+
+contact_sensors: []

@@ -1,0 +1,62 @@
+# Bare robot scene: ground + R1Pro only, no table/objects/sensors.
+#
+# Used to verify pure robot skills (arm/torso/base/gripper motion, queries)
+# without the table and cylinder: no obstacle constraints, no accidental
+# object contact -- cleaner, faster, more stable verification. Skills that
+# need an environment (grasp, push, object queries, obstacle navigation)
+# keep using the pickplace scenes.
+
+name: bare
+
+world:
+  gravity: [0.0, 0.0, -9.81]
+  dt: 0.016667              # 60 Hz
+  ground: true
+  ground_size: [20.0, 20.0]
+  ground_color: [0.25, 0.26, 0.28]
+
+robot:
+  asset: asset/r1pro/r1pro.usda
+  init_pose: [0.0, 0.0, 0.0]   # x, y, yaw in world frame
+  # All-zero neutral home (arms hang straight down, gravity-balanced).
+  home_joint_pos:
+    steer_motor_joint1: 0.0
+    steer_motor_joint2: 0.0
+    steer_motor_joint3: 0.0
+    wheel_motor_joint1: 0.0
+    wheel_motor_joint2: 0.0
+    wheel_motor_joint3: 0.0
+    torso_joint1: 0.0
+    torso_joint2: 0.0
+    torso_joint3: 0.0
+    torso_joint4: 0.0
+    left_arm_joint1: 0.0
+    left_arm_joint2: 0.0
+    left_arm_joint3: 0.0
+    left_arm_joint4: 0.0
+    left_arm_joint5: 0.0
+    left_arm_joint6: 0.0
+    left_arm_joint7: 0.0
+    right_arm_joint1: 0.0
+    right_arm_joint2: 0.0
+    right_arm_joint3: 0.0
+    right_arm_joint4: 0.0
+    right_arm_joint5: 0.0
+    right_arm_joint6: 0.0
+    right_arm_joint7: 0.0
+    left_gripper_finger_joint1: 0.0
+    left_gripper_finger_joint2: 0.0
+    right_gripper_finger_joint1: 0.0
+    right_gripper_finger_joint2: 0.0
+
+objects: []
+
+cameras:
+  - name: main
+    eye: [3.5, -3.5, 2.5]
+    target: [0.0, 0.0, 0.8]
+    width: 640
+    height: 480
+    focal_length: 24.0
+
+contact_sensors: []
